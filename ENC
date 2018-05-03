@@ -1,0 +1,16 @@
+#!/bin/sh
+
+if [ "$#" -ne 3 ] ; then
+  echo "Usage: $0 YYYY-MM-DD Source_Folder  segment_number" >&2
+  echo "Ex: $0 2014-03-09 today  2" >&2
+  echo "Ex: $0 2014-11-28 weekend  1" >&2
+  echo "Ex: $0 2014-12-24 holiday/xmas24 5" >&2
+  exit 1
+fi
+
+
+name_date=$1
+source_dir=$2
+segment_idx=$3
+cp  ${source_dir}/${segment_idx}.mov  female_show_${name_date}_hd_${segment_idx}.mov
+./sk_encode.sh female_show_${name_date}_hd_${segment_idx}.mov

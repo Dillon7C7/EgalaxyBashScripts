@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ] || ! [ -f "$1" ]; then
+  echo "Usage: $0 file" >&2
+  exit 1
+fi
+
+
+FILE=$1
+
+scp $FILE USER@REMOTE_HOST:REMOTE_DIRECTORY
+

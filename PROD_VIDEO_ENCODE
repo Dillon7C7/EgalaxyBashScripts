@@ -1,0 +1,19 @@
+#!/bin/sh
+
+if [ "$#" -ne 3 ] ; then
+  echo "Usage: $0  Source_Folder file_name  new_name" >&2
+  echo "Ex: $0  today Feb10_Xposed_MrSkin-NNIB.mov production_hd_148_nude_clip.mov" >&2
+  echo "Ex: $0  today Feb10_Xposed_MrSkin-CLothed-NNIB.mov production_hd_148_pg_clip.mov" >&2
+  echo "Ex: $0  today Feb10_Entertainment_MrSkin.mov production_hd_146_nude_clip.mov" >&2
+  exit 1
+fi
+
+
+source_dir=$1
+old_name=$2
+new_name=$3
+
+cp  ${source_dir}/${old_name}  ${new_name}
+#./upload2SK ${new_name}
+./sk_encode.sh ${new_name}
+

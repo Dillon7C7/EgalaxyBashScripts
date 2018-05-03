@@ -1,0 +1,33 @@
+#!/usr/bin/expect
+
+#read the input parameters
+set file [lindex $argv 0]
+
+#set global parameters
+set user "USERNAME"
+set host "REMOTE_HOST"
+set timeout 100000000000
+
+#sftp to specified host and send the files
+spawn sftp $user@$host
+expect "password:"
+sleep 5
+
+send "PASSWORD\r"
+
+expect "sftp>"
+send "cd REMOTE_DIRECTORY
+expect "sftp>"
+send "put $file\r"
+
+#interact
+expect "sftp>"
+send "bye\r"
+
+exit 0
+
+
+
+
+
+
