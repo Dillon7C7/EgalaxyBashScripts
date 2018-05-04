@@ -3,7 +3,8 @@
 if [ "$#" -ne 3 ] ; then
   echo "Usage: $0  Source_Folder file_name  new_name" >&2
   echo "Ex: $0  today DP_May04.mov 2018-05-04_DailyPromo.mov" >&2
-  echo "Ex: $0  today DP_Apr25.mov 2017-04-25_DailyPromo.mov" >&2
+  echo "Ex: $0  friday DP_Apr25.mov 2017-04-25_DailyPromo.mov" >&2
+  echo "Ex: $0  weekend DP_Feb16.mov 2014-02-16_DailyPromo.mov" >&2
   exit 1
 fi
 
