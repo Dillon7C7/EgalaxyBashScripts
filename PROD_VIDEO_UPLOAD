@@ -2,9 +2,9 @@
 
 if [ "$#" -ne 3 ] ; then
   echo "Usage: $0  Source_Folder file_name  new_name" >&2
-  echo "Ex: $0  today Feb10_Xposed_MrSkin.mov 2015-02-10_HollywoodXposed.mov" >&2
+  echo "Ex: $0  today Feb10_Xposed_MrSkin.mov 2015-02-25_HollywoodXposed.mov" >&2
   echo "Ex: $0  today Feb10_Xposed_MrSkin-Clothed.mov 2015-02-10_HollywoodXposed-Clothed.mov" >&2
-  echo "Ex: $0  today Feb11_Entertainment_MrSkin.mov 2015-02-11_Entertainment.mov" >&2
+  echo "Ex: $0  today Feb11_Entertainment_MrSkin.mov 2015-12-19_Entertainment.mov" >&2
   exit 1
 fi
 
