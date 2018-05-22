@@ -4,7 +4,7 @@ WORK_DIR="/home/encoder/w"
 
 # make sure we are in the working directory
 if [ "$(pwd)" != "$WORK_DIR" ]; then
-  echo "ERROR: MUST BE IN DIRECTORY: /home/encoder/w" >&2
+  echo "ERROR! MUST BE IN DIRECTORY: /home/encoder/w" >&2
   exit 1
 fi
 
