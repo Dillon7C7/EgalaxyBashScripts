@@ -62,5 +62,11 @@ while (( "$#" )); do # loop through segment numbers
 	fi
 	
 	./ENC $name_date $source_dir $1	
-	shift
+
+	if [ "$?" -eq "0" ]; then
+		shift
+	else
+		echo "ERROR: something bad happened..." >&2
+		exit 1
+	fi
 done
