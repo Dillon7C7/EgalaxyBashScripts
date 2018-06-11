@@ -63,8 +63,10 @@ while (( "$#" )); do # loop through segment numbers
 	
 	./ENC $name_date $source_dir $1	
 
+	echo "---------------------------------------"
+
 	if [ "$?" -eq "0" ]; then
-		echo "Segment $1 complete!!!"
+		echo "Segment $1 complete !!!!!!"
 		shift
 	else
 		echo "ERROR: something bad happened..." >&2
