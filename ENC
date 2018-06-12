@@ -13,4 +13,11 @@ name_date=$1
 source_dir=$2
 segment_idx=$3
 cp  ${source_dir}/${segment_idx}.mov  female_show_${name_date}_hd_${segment_idx}.mov
-./sk_encode.sh female_show_${name_date}_hd_${segment_idx}.mov
+
+if [ "$?" -eq "0" ]; then
+	./sk_encode.sh female_show_${name_date}_hd_${segment_idx}.mov
+else
+	echo "$0 ERROR: cp from working directory failed" >&2
+	exit 1
+fi
+
