@@ -1,6 +1,6 @@
 #!/bin/bash
 
-usage="Usage: $0 YYYY-MM-DD Source_Folder segment_numbers"
+usage="Usage: $0 YYYY-MM-DD Source_Folder segment_number(s)"
 
 if [ "$#" -lt "3" ]; then
 	echo "$usage" >&2
@@ -52,6 +52,9 @@ fi
 shift 2
 
 segment_regex="^[0-9]+$"
+segment_list="$@"
+success_array=()
+failure_array=()
 
 while (( "$#" )); do # loop through segment numbers
 	if [[ ! "$1" =~ $segment_regex ]]; then
@@ -64,12 +67,25 @@ while (( "$#" )); do # loop through segment numbers
 	./ENC $name_date $source_dir $1	
 
 	echo "---------------------------------------"
-
+echo "$?"
+	# if ./ENC exited successfully...
 	if [ "$?" -eq "0" ]; then
 		echo "Segment $1 complete !!!!!!"
-		shift
+		success_array+=("$1")
 	else
-		echo "ERROR: something bad happened..." >&2
-		exit 1
+		echo "ERROR: something bad happened; segment $1 failed!!" >&2
+		failure_array+=("$1")
 	fi
+
+	shift
 done
+
+echo "---------------------------------------"
+echo "These segments were given: $segment_list"
+echo "These segments were processed: ${success_array[@]}"
+
+if [ -n "$failure_array" ]; then
+	echo "These segments failed: ${failure_array[@]}" >&2
+fi
+
+echo "DONE !!!!!!"
