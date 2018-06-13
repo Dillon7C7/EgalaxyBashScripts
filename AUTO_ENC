@@ -89,7 +89,7 @@ while (( "$#" )); do # loop through segment numbers
 done
 
 echo "---------------------------------------"
-echo "These (valid) segments were given: $segment_array"
+echo "These (valid) segments were given: ${segment_array[@]}"
 
 if [ -n "$success_array" ]; then
 	echo "These segments were processed: ${success_array[@]}"
