@@ -53,7 +53,7 @@ fi
 shift 2
 
 segment_regex="^[1-7]+$"
-segment_list="$@"
+segment_array=()
 success_array=()
 failure_array=()
 
@@ -68,6 +68,8 @@ while (( "$#" )); do # loop through segment numbers
 		#shift
 		#continue
 	else
+		segment_array+=("$1")
+
 		./ENC $name_date $source_dir $1	
 		enc_status="$?"
 	
@@ -87,7 +89,7 @@ while (( "$#" )); do # loop through segment numbers
 done
 
 echo "---------------------------------------"
-echo "These segments were given: $segment_list"
+echo "These (valid) segments were given: $segment_array"
 
 if [ -n "$success_array" ]; then
 	echo "These segments were processed: ${success_array[@]}"
