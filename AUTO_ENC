@@ -2,11 +2,16 @@
 
 usage="Usage: $0 YYYY-MM-DD Source_Folder segment_number(s)"
 
-if [ "$#" -lt "3" ]; then
+print_usage()
+{
 	echo "$usage" >&2
 	echo "Ex: $0 2014-03-09 today 4 2" >&2
 	echo "Ex: $0 2014-11-28 weekend 1 2 3" >&2
 	echo "Ex: $0 2014-12-24 holiday 3 4 5 6 7" >&2
+}
+
+if [ "$#" -lt "3" ]; then
+	print_usage
 	exit 1
 fi 
 
@@ -18,6 +23,8 @@ date_regex="^([0-9]{4})-([0-9]{2})-([0-9]{2})$"
 
 if [[ ! "$1" =~ $date_regex ]]; then
 	echo "$0 ERROR: date must be in the format YYYY-MM-DD" >&2
+	echo "---------------------------------------"
+	print_usage
 	exit 1
 fi
 
@@ -26,6 +33,8 @@ month="${BASH_REMATCH[2]}"
 # check month, must be <= 12
 if [ "$month" -gt "12" ]; then
 	echo "$0 ERROR: month must be 12 or less" >&2
+	echo "---------------------------------------"
+	print_usage
 	exit 1
 fi
 
@@ -34,6 +43,8 @@ day="${BASH_REMATCH[3]}"
 # check day, must be <= 31
 if [ "$day" -gt "31" ]; then
 	echo "$0 ERROR: day must be 31 or less" >&2
+	echo "---------------------------------------"
+	print_usage
 	exit 1
 fi
 
@@ -44,6 +55,8 @@ fi
 if [[ ! "$source_dir" =~ ^(today|friday|weekend|holiday)$ ]]; then
 	echo -e "$0 ERROR: source directory must be one of:\n\
 today\nfriday\nweekend\nholiday" >&2
+	echo "---------------------------------------"
+	print_usage
 	exit 1
 fi
 
@@ -64,7 +77,7 @@ while (( "$#" )); do # loop through segment numbers
 	if [[ ! "$1" =~ $segment_regex ]]; then
 		echo "$0 ERROR: $1 must be a number! (between 1-7 inclusive)" >&2
 		echo "Skipping $1..."
-		sleep 2s
+		sleep 1.5s
 		#shift
 		#continue
 	else
