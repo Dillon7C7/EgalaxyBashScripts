@@ -21,7 +21,7 @@ full_date="$(date +%Y-%m-%d)"
 # Group 1 is the folder. Group 2 is DP filename.
 # Group 3 is the abbreviated month name. Group 4 is the day. 
 # today DP_Mar03.mov Mar 03 ------- today/DP_Mar03.mov
-regex="(today|friday|weekend|holiday)/(DP_([[:alpha:]]{3})([[:digit:]]{2})\.mov)"
+regex="^(today|friday|weekend|holiday)/(DP_([[:alpha:]]{3})([[:digit:]]{2})\.mov)$"
 
 if [[ ! "$1" =~ $regex ]]; then
 	echo "$0 ERROR: I think the DP was named incorrectly..." >&2
