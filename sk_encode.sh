@@ -28,7 +28,7 @@ echo "Copying to local"
 
 mv ${INPUT/.mov/}.mp4  /home/encoder/w/done_archive/sk/out/
 echo "---------------------------------------"
-echo "Copying to blabnetwork!"
+echo "Copying to REMOTE_HOST!"
 
 #scp  /home/encoder/w/done_archive/sk/${INPUT/.mov/}.mp4     USER@REMOTE_HOST:REMOTE_DIRECTORY
 #scp  /home/encoder/w/done_archive/sk/${INPUT/.mov/}.mp4     USER@REMOTE_HOST:/REMOTE_DIRECTORY
