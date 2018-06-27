@@ -1,0 +1,21 @@
+#!/bin/sh
+
+if [ "$#" -ne 2 ] ; then
+  echo "Usage: $0  Source_Folder file_name " >&2
+  echo "Ex: $0  today NN_702h264.mov" >&2
+  exit 1
+fi
+
+
+source_dir=$1
+old_name=$2
+new_name=$3
+
+cp  ${source_dir}/${old_name}  .
+
+ffmpeg -i ./${old_name}  -vn -ac 2 -ar 44100 -ab 256k -f mp3 ./${old_name}.mp3
+./domenic_upload ./${old_name}.mp3
+./domenic_upload ./${old_name}
+
+#./sk_encode.sh ${new_name}
+
