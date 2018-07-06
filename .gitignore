@@ -1,9 +1,6 @@
 # ignore all files and directories except the scripts used during the daily workflow
 *
 
-!.gitignore
-!README.md
-
 # Daily workflow scripts
 !CLEANUP
 !DVU
@@ -24,3 +21,4 @@
 
 !AUTO_ENC
 !LAZY_PROMO
+!LAZY_PROMO_UPLOAD
