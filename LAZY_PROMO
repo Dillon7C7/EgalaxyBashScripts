@@ -35,6 +35,7 @@ month_num=${BASH_REMATCH[4]}
 
 new_name="program_promo_hd_welcome_${month_str}${month_num}.mov"
 
+echo "Filename is: $new_name !!!!!!"
 #cp ${source_dir}/${old_name} ${new_name}
 cp $1 ${new_name}
 ./sk_encode.sh ${new_name}
