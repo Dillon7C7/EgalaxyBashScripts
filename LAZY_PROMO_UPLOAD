@@ -1,6 +1,6 @@
 #!/bin/bash
 
-usage="Usage: $0 Source_Folder/File_Name"
+usage="Usage: $0" 
 
 # must be in the working directory
 if [ "$(pwd)" != "/home/encoder/w" ]; then
@@ -8,34 +8,39 @@ if [ "$(pwd)" != "/home/encoder/w" ]; then
 	exit 1
 fi
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" -gt 0 ]; then
 	echo "$usage" >&2
-	echo "Ex: $0 today/DP_Feb09.mov" >&2
-	echo "Ex: $0 weekend/DP_Mar12.mov" >&2
-	echo "Ex: $0 holiday/DP_Dec24.mov" >&2
 	exit 1
 fi
 
+weekday_name="$(date +%A)"
+month="$(date +%b%d)"
+month_str="$(date +%b)"
+month_num="$(date +%d)"
 full_date="$(date +%Y-%m-%d)"
 
-# Group 1 is the folder. Group 2 is DP filename.
-# Group 3 is the abbreviated month name. Group 4 is the day. 
-# today DP_Mar03.mov Mar 03 ------- today/DP_Mar03.mov
-regex="^(today|friday|weekend|holiday)/(DP_([[:alpha:]]{3})([[:digit:]]{2})\.mov)$"
-
-if [[ ! "$1" =~ $regex ]]; then
-	echo "$0 ERROR: I think the DP was named incorrectly..." >&2
+# Day of the week can only be a weekday.
+if [ "$weekday_name" == "Saturday" ] || [ "$weekday_name" == "Sunday" ]; then
+	echo "There's no daily promo on Saturday or Sunday!!! \
+	Only run this script from Monday to Friday." >&2
 	exit 1
+elif [ "$weekday_name" == "Friday" ]; then
+	source_dir="friday"
+else
+	source_dir="today"
 fi
 
-source_dir=${BASH_REMATCH[1]}
-old_name=${BASH_REMATCH[2]}
-month_str=${BASH_REMATCH[3]}
-month_num=${BASH_REMATCH[4]}
+file_path="${source_dir}/DP_${month}.mov"
+ 
+if [[ ! -f "$file_path" ]]; then
+	echo "$0 ERROR: DP not found in directory ${source_dir}!!!" >&2
+	exit 1
+fi
 
 new_name="${full_date}_DailyPromo.mov"
 
 echo "Filename is: $new_name !!!!!!"
-#cp ${source_dir}/${old_name} ${new_name}
-cp $1 ${new_name}
+echo "$file_path"
+
+cp $file_path ${new_name}
 ./upload2SK ${new_name}
