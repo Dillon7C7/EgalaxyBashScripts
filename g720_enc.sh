@@ -35,7 +35,7 @@ INPUT=${MOVINPUT/.mov/}.mp4
 
  
 $FFMPEG -y -i "./$INPUT" -c:v libx264 -b:v 1200k -vf scale=1280:720 -pass 1 -x264opts "keyint=60:ref=5" -preset veryslow -profile:v main -level 3.1 -pix_fmt yuv420p -an -f mp4 /dev/null
-$FFMPEG -y -i "./$INPUT" -c:v libx264 -b:v 1200k -vf scale=1280:720 -pass 2 -x264opts "keyint=60:ref=5" -preset veryslow -profile:v main -level 3.1 -pix_fmt yuv420p -c:a libfdk_aac -b:a 96k -movflags faststart "${OUTDIR}/${INPUT}_720.mp4"
+$FFMPEG -y -i "./$INPUT" -c:v libx264 -b:v 1200k -vf scale=1280:720 -pass 2 -x264opts "keyint=60:ref=5" -preset veryslow -profile:v main -level 3.1 -pix_fmt yuv420p -c:a aac -strict -2 -b:a 96k -movflags faststart "${OUTDIR}/${INPUT}_720.mp4"
 
 
 
