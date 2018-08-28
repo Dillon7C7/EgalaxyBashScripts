@@ -34,6 +34,10 @@ echo "Copying to REMOTE_HOST!"
 #scp  /home/encoder/w/done_archive/sk/${INPUT/.mov/}.mp4     USER@REMOTE_HOST:/REMOTE_DIRECTORY
 scp  /home/encoder/w/done_archive/sk/out/${INPUT/.mov/}.mp4     USER@REMOTE_HOST.com:/REMOTE_DIRECTORY
 echo "---------------------------------------"
-echo "${INPUT/.mov/}.mp4 done 100%"
 
-
+if [ "$?" -eq "0" ]; then
+	echo "${INPUT/.mov/}.mp4 done 100%"
+else
+	echo "$0 ERROR: scp of ${INPUT/.mov/}.mp4 failed." >&2
+	exit 1
+fi
