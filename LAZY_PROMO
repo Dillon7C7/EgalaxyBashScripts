@@ -53,9 +53,9 @@ sleep 2
 
 cp $file_path_nude ${new_name_nude}
 ./sk_encode.sh ${new_name_nude}
-echo "${new_name_nude} Complete !!!!"
+echo "${new_name_nude/.mov/.mp4} Complete !!!!"
 sleep 2
 
 cp $file_path_social ${new_name_social}
 ./sk_encode.sh ${new_name_social}
-echo "${new_name_social} Complete !!!!"
+echo "${new_name_social/.mov/.mp4} Complete !!!!"
