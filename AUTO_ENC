@@ -53,9 +53,10 @@ fi
 # check source directory
 # must be one of today, friday, weekend, holiday
 dir_regex="^(today|friday|weekend|holiday(/[0-9]{4}-[0-9]{2}-[0-9]{2})?)$" 
-if [[ ! "$source_dir" =~ dir_regex ]]; then
+
+if [[ ! "$source_dir" =~ $dir_regex ]]; then
 	echo -e "$0 ERROR: source directory must be one of:\n\
-today\nfriday\nweekend\nholiday" >&2
+today\nfriday\nweekend\nholiday\nholiday/yyyy-mm-dd" >&2
 	echo "---------------------------------------"
 	print_usage
 	exit 1
