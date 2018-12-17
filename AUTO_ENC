@@ -67,7 +67,7 @@ fi
 # remove $1 and $2 from list of arguments
 shift 2
 
-segment_regex="^[1-7]+$"
+segment_regex="^[1-9]+$"
 segment_array=()
 success_array=()
 failure_array=()
@@ -77,7 +77,7 @@ while (( "$#" )); do # loop through segment numbers
 	echo "---------------------------------------"
 
 	if [[ ! "$1" =~ $segment_regex ]]; then
-		echo "$0 ERROR: $1 must be a number! (between 1-7 inclusive)" >&2
+		echo "$0 ERROR: $1 must be a number! (between 1-9 inclusive)" >&2
 		echo "Skipping $1..."
 		sleep 1.5s
 		#shift
