@@ -31,31 +31,41 @@ else
 	source_dir="today"
 fi
 
+file_path_social="${source_dir}/$(ls ${source_dir} | grep -i social)"
+##file_path_social="${source_dir}/DP_${month_and_day}_social.mov"
+
+# match the two different naming schemes editors use for Social DP. e.g.:
+# DP_Social_Dec14.mov	    or
+# DP_Dec14_social.mov
+social_regex="${source_dir}/DP_((${month_and_day}_social)|(Social_${month_and_day}))\.mov"
+
 file_path_nude="${source_dir}/DP_${month_and_day}.mov"
-file_path_social="${source_dir}/DP_${month_and_day}_social.mov"
  
+# If the social file does not exist, OR if the regex doesn't match, fail.
+if [[ ! -f "${file_path_social}" ]] || [[ ! "${file_path_social}" =~ $social_regex ]]; then
+	echo "$0 ERROR: Social DP not found in directory ${source_dir}!!!" >&2
+	exit 1
+fi
+
 if [[ ! -f "$file_path_nude" ]]; then
 	echo "$0 ERROR: Nude DP not found in directory ${source_dir}!!!" >&2
 	exit 1
 fi
 
-if [[ ! -f "$file_path_social" ]]; then
-	echo "$0 ERROR: Social DP not found in directory ${source_dir}!!!" >&2
-	exit 1
-fi
 
-new_name_nude="program_promo_nude_${full_date}.mov"
 new_name_social="program_promo_social_${full_date}.mov"
+new_name_nude="program_promo_nude_${full_date}.mov"
 
-echo "Filename one is: $new_name_nude !!!!!!"
 echo "Filename two is: $new_name_social !!!!!!"
-sleep 2
-
-cp $file_path_nude ${new_name_nude}
-./sk_encode.sh ${new_name_nude}
-echo "${new_name_nude/.mov/.mp4} Complete !!!!"
+echo "Filename one is: $new_name_nude !!!!!!"
 sleep 2
 
 cp $file_path_social ${new_name_social}
 ./sk_encode.sh ${new_name_social}
-echo "${new_name_social/.mov/.mp4} Complete !!!!"
+#echo "${new_name_social/.mov/.mp4} Complete !!!!"
+
+sleep 2
+
+cp $file_path_nude ${new_name_nude}
+./sk_encode.sh ${new_name_nude}
+#echo "${new_name_nude/.mov/.mp4} Complete !!!!"
