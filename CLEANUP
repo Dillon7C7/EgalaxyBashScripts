@@ -1,11 +1,60 @@
-#!/bin/sh
+#!/bin/bash
 
-WORK_DIR="/home/encoder/w"
+WORK_DIR="/home/encoder/w" # working directory
+
+usage_flag=false # if true, print help
+verbose_flag=false # if true, set -x
+dom_flag=false # if true, delete domenic's files on remote
+invalid_flag=false # if true, exit before rest of script
+
+remote_cmd='cd REMOTE_DIRECTORY;./.cleanup'
+dom_del=';cd domenic;./.cleanup'
+
+# print script usage
+print_usage()
+{
+    echo -e "Usage: $0 [-hvD]\n\
+	-h	print this message\n\
+	-v	be verbose\n\
+	-D	delete files for Domenic"
+}
 
 # make sure we are in the working directory
 if [ "$(pwd)" != "$WORK_DIR" ]; then
   echo "ERROR! MUST BE IN DIRECTORY: /home/encoder/w" >&2
   exit 1
+fi
+
+while getopts ':hvD' opt
+do
+    case "${opt}" in
+	h) usage_flag=true ;;
+	v) verbose_flag=true ;;
+	D) dom_flag=true ;;
+	\?) echo "Invlaid option: -${OPTARG}" >&2
+	    invalid_flag=true ;;
+    esac
+done
+
+# exit to prevent the rest of the script from executing
+if "$invalid_flag"; then
+    exit 1
+fi
+
+# print usage message, and exit
+if "$usage_flag"; then
+    print_usage
+    exit 2
+fi
+
+# set verbosity
+if "$verbose_flag"; then
+    set -x
+fi
+
+# modify remote command to include deleting dom's files
+if "$dom_flag"; then
+    remote_cmd="${remote_cmd}${dom_del}"
 fi
 
 echo "Running Cleanup !!!!!!"
@@ -16,4 +65,4 @@ rm -f ${WORK_DIR}/*.mp4
 rm -f ${WORK_DIR}/*.mp3
 rm -f ${WORK_DIR}/*.mov
 rm -f ${WORK_DIR}/ffmpeg2pass*
-ssh USER@REMOTE_HOST 'cd REMOTE_DIRECTORY;./.cleanup'
+ssh USER@REMOTE_HOST "${remote_cmd}"
