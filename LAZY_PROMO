@@ -56,8 +56,8 @@ fi
 new_name_social="program_promo_social_${full_date}.mov"
 new_name_nude="program_promo_nude_${full_date}.mov"
 
-echo "Filename two is: $new_name_social !!!!!!"
-echo "Filename one is: $new_name_nude !!!!!!"
+echo "Filename one is: $new_name_social !!!!!!"
+echo "Filename two is: $new_name_nude !!!!!!"
 sleep 2
 
 cp $file_path_social ${new_name_social}
