@@ -6,6 +6,7 @@ usage_flag=false # if true, print help
 verbose_flag=false # if true, set -x
 dom_flag=false # if true, delete domenic's files on remote
 invalid_flag=false # if true, exit before rest of script
+print_flag=false # if true, don't print a newline on invalid flags
 
 remote_cmd='cd REMOTE_DIRECTORY;./.cleanup'
 dom_del=';cd domenic;./.cleanup'
@@ -31,13 +32,19 @@ do
 	h) usage_flag=true ;;
 	v) verbose_flag=true ;;
 	D) dom_flag=true ;;
-	\?) echo "Invlaid option: -${OPTARG}" >&2
+	\?) if ! "$flag"; then
+			echo -en "\n"
+			print_flag=true
+		fi
+		echo "Invalid option: -${OPTARG}" >&2
 	    invalid_flag=true ;;
     esac
 done
 
 # exit to prevent the rest of the script from executing
 if "$invalid_flag"; then
+	echo -en "\n"
+    print_usage
     exit 1
 fi
 
