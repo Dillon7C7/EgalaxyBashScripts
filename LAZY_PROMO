@@ -40,12 +40,18 @@ file_path_social="${source_dir}/$(ls ${source_dir} | grep -i social)"
 social_regex="${source_dir}/DP_((${month_and_day}_social)|(Social_${month_and_day}))\.mov"
 
 file_path_nude="${source_dir}/DP_${month_and_day}.mov"
+
+# ignore case for regex
+shopt -s nocasematch
  
 # If the social file does not exist, OR if the regex doesn't match, fail.
 if [[ ! -f "${file_path_social}" ]] || [[ ! "${file_path_social}" =~ $social_regex ]]; then
 	echo "$0 ERROR: Social DP not found in directory ${source_dir}!!!" >&2
 	exit 1
 fi
+
+# turn off ignore case for regex
+shopt -u nocasematch
 
 if [[ ! -f "$file_path_nude" ]]; then
 	echo "$0 ERROR: Nude DP not found in directory ${source_dir}!!!" >&2
