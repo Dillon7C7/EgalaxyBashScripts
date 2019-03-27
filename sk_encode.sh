@@ -33,6 +33,7 @@ echo "Copying to REMOTE_HOST!"
 #scp  /home/encoder/w/done_archive/sk/${INPUT/.mov/}.mp4     USER@REMOTE_HOST:REMOTE_DIRECTORY
 #scp  /home/encoder/w/done_archive/sk/${INPUT/.mov/}.mp4     USER@REMOTE_HOST:/REMOTE_DIRECTORY
 scp  /home/encoder/w/done_archive/sk/out/${INPUT/.mov/}.mp4     USER@REMOTE_HOST.com:/REMOTE_DIRECTORY
+#scp -P 2222 /home/encoder/w/done_archive/sk/out/${INPUT/.mov/}.mp4     nnencoder@192.168.7.106:/var/www/html/shows/
 echo "---------------------------------------"
 
 if [ "$?" -eq "0" ]; then

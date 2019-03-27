@@ -9,4 +9,4 @@ fi
 FILE=$1
 
 scp $FILE USER@REMOTE_HOST:REMOTE_DIRECTORY
-
+#scp -P 2222 $FILE nnencoder@192.168.7.106:/var/www/html/shows/dom/
