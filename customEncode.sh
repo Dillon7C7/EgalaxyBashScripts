@@ -9,14 +9,12 @@ fi
 
 # ./gsk_encode.sh BTL-HannaOrio-60sec.mov ; ./gWM.sh BTL-HannaOrio-60sec.mov ;./g1080_enc.sh BTL-HannaOrio-60sec.mov
 source_dir=$1
-filename=$2
+filename="$2"
 resolution=$3
 
 
-cp  ${source_dir}/${filename}  ./${filename}
+cp  "${source_dir}/${filename}"  ./"${filename}"
 
-./gsk_encode.sh ${filename} ; 
-./gWM.sh ${filename}  ;
-./g${resolution}_enc.sh ${filename}  
-
-
+./gsk_encode.sh "${filename}" ;
+./gWM.sh "${filename}"  ;
+./g${resolution}_enc.sh "${filename}"
