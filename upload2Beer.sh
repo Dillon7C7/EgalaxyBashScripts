@@ -81,11 +81,11 @@ remote_user="USER"
 if [[ "$remote_dir_flag" -eq 0 ]]; then
 	remote_url="REMOTE_HOST:REMOTE_DIRECTORY"
 else # did have -d flag
-	remote_url="REMOTE_HOST:REMOTE_DIRECTORY"/${remote_dir}"
+	remote_url="REMOTE_HOST:REMOTE_DIRECTORY"/"${remote_dir}"
 fi
 
 # the actual uploading
-scp "$file" "${remote_user}@${remote_url}/${file}"
+scp "$file" "${remote_user}"@"${remote_url}"/"'${file}'"
 
 if [[ "$?" -eq 0 ]]; then
 	echo "File uploaded successfully."
