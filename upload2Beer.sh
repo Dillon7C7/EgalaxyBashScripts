@@ -75,6 +75,7 @@ elif [[ ! -f "${file_arg[0]}" ]]; then
 fi
 
 file="${file_arg[0]}"
+remote_file="$(/usr/bin/basename "${file}")"
 remote_user="USER"
 
 # didn't have -d flag
@@ -85,7 +86,7 @@ else # did have -d flag
 fi
 
 # the actual uploading
-scp "$file" "${remote_user}"@"${remote_url}"/"'${file}'"
+scp "$file" "${remote_user}"@"${remote_url}"/"'${remote_file}'"
 
 if [[ "$?" -eq 0 ]]; then
 	echo "File uploaded successfully."
