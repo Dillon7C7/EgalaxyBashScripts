@@ -31,7 +31,7 @@ else
 	source_dir="today"
 fi
 
-file_path_social="${source_dir}/$(ls ${source_dir} | grep -i social)"
+file_path_social="${source_dir}/$(ls ${source_dir} | grep -i "DP.*social")"
 ##file_path_social="${source_dir}/DP_${month_and_day}_social.mov"
 
 # match the two different naming schemes editors use for Social DP. e.g.:
