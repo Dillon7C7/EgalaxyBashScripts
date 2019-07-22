@@ -1,0 +1,33 @@
+# Exclude 104/RawFtg Directories
+- RawFtg_X/Jan[0-9][0-9]_[0-9][0-9][0-9][0-9]** 
+- RawFtg_X/Feb[0-9][0-9]_[0-9][0-9][0-9][0-9]**
+- RawFtg_X/Mar[0-9][0-9]_[0-9][0-9][0-9][0-9]**
+- RawFtg_X/Apr[0-9][0-9]_[0-9][0-9][0-9][0-9]**
+- RawFtg_X/May[0-9][0-9]_[0-9][0-9][0-9][0-9]**
+- RawFtg_X/Jun[0-9][0-9]_[0-9][0-9][0-9][0-9]**
+- RawFtg_X/Jul[0-9][0-9]_[0-9][0-9][0-9][0-9]**
+- RawFtg_X/Aug[0-9][0-9]_[0-9][0-9][0-9][0-9]**
+- RawFtg_X/Sep[0-9][0-9]_[0-9][0-9][0-9][0-9]**
+- RawFtg_X/Oct[0-9][0-9]_[0-9][0-9][0-9][0-9]**
+- RawFtg_X/Nov[0-9][0-9]_[0-9][0-9][0-9][0-9]**
+- RawFtg_X/Dec[0-9][0-9]_[0-9][0-9][0-9][0-9]**
+
+# Exclude 104/RawFtg/The Day's Dick
+- RawFtg_X/The\ Day\'s\ Dick/***
+
+# Exclude 104/Finished_Shows Directories
+- Finished_Shows_X/Jan*[0-9][0-9][0-9][0-9]_X** 
+- Finished_Shows_X/Feb*[0-9][0-9][0-9][0-9]_X**
+- Finished_Shows_X/Mar*[0-9][0-9][0-9][0-9]_X**
+- Finished_Shows_X/Apr*[0-9][0-9][0-9][0-9]_X**
+- Finished_Shows_X/May*[0-9][0-9][0-9][0-9]_X**
+- Finished_Shows_X/Jun*[0-9][0-9][0-9][0-9]_X**
+- Finished_Shows_X/Jul*[0-9][0-9][0-9][0-9]_X**
+- Finished_Shows_X/Aug*[0-9][0-9][0-9][0-9]_X**
+- Finished_Shows_X/Sep*[0-9][0-9][0-9][0-9]_X**
+- Finished_Shows_X/Oct*[0-9][0-9][0-9][0-9]_X**
+- Finished_Shows_X/Nov*[0-9][0-9][0-9][0-9]_X**
+- Finished_Shows_X/Dec*[0-9][0-9][0-9][0-9]_X**
+
+# Include everything else
++ **
