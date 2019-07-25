@@ -20,6 +20,7 @@
 !/upload2SK
 !/upload2Beer.sh
 !/synology_backup.sh
+!/new_synology_backup.sh
 !/rsync_filters/
 !/rsync_filters/*
 !/rsync_filters/unused_filters/
