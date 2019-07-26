@@ -44,7 +44,7 @@ done
 "$syno_rsync" "${rsync_args[@]}" --log-file="${logfile_social_media}" "/volume1/Social_Media/" "rsync://rsyncer@192.168.77.108/social_mediaBackup/current/"
 
 # South Africa
-"$syno_rsync" "${rsync_args[@]}" --log-file="${logfile_southafrica}" "/volume1/SOUTHAFRICA/" "rsync://rsyncer@192.168.77.108/southafrica/current/"
+"$syno_rsync" "${rsync_args[@]}" --log-file="${logfile_southafrica}" "/volume1/SOUTHAFRICA/" "rsync://rsyncer@192.168.77.108/southafricaBackup/current/"
 
 # 104 RawFtg_X/The Day's Dick
 "$syno_rsync" "${rsync_args[@]}" --log-file="${logfile_104_RawFtg_DaysDick}" --filter="merge daysdick_filter" "/volume1/104/" "rsync://rsyncer@192.168.77.108/daysdickBackup/current/"
