@@ -8,6 +8,9 @@ syno_basename="/bin/basename"
 syno_rsync="/bin/rsync"
 syno_mkdir="/bin/mkdir"
 
+# backup directory on NAS containing rsync filter files, logs, and scripts
+backup_directory="/var/services/homes/dillon/backup"
+
 today_date="$(date +%F)"
 
 # array of shares to be backed up
@@ -47,13 +50,13 @@ done
 "$syno_rsync" "${rsync_args[@]}" --log-file="${logfile_southafrica}" "/volume1/SOUTHAFRICA/" "rsync://rsyncer@192.168.77.108/southafricaBackup/current/"
 
 # 104 RawFtg_X/The Day's Dick
-"$syno_rsync" "${rsync_args[@]}" --log-file="${logfile_104_RawFtg_DaysDick}" --filter="merge daysdick_filter" "/volume1/104/" "rsync://rsyncer@192.168.77.108/daysdickBackup/current/"
+"$syno_rsync" "${rsync_args[@]}" --log-file="${logfile_104_RawFtg_DaysDick}" --filter="merge ${backup_directory}/daysdick_filter" "/volume1/104/" "rsync://rsyncer@192.168.77.108/daysdickBackup/current/"
 
-# 104 excluding Finished_Shows_X/FINSHOWS, RawFtg_X/RAWSHOWS,The Day's Dick
-"$syno_rsync" "${rsync_args[@]}" --log-file="${logfile_104}" --filter="merge 104_filter" "/volume1/104/" "rsync://rsyncer@192.168.77.107/104Backup/104/"
+# 104 excluding Finished_Shows_X/FINSHOWS, RawFtg_X/RAWSHOWS, The Day's Dick
+"$syno_rsync" "${rsync_args[@]}" --log-file="${logfile_104}" --filter="merge ${backup_directory}/104_filter" "/volume1/104/" "rsync://rsyncer@192.168.77.107/104Backup/104/"
 
 # 104 Finished_Shows_X/FINSHOWS
-"$syno_rsync" "${rawfin_rsync_args[@]}" --log-file="${logfile_104_Finished_Shows}" --filter="merge finish_filter" "/volume1/104/Finished_Shows_X/" "rsync://rsyncer@192.168.77.105/RawFinBkup/finish/current/"
+"$syno_rsync" "${rawfin_rsync_args[@]}" --log-file="${logfile_104_Finished_Shows}" --filter="merge ${backup_directory}/finish_filter" "/volume1/104/Finished_Shows_X/" "rsync://rsyncer@192.168.77.105/RawFinBkup/finish/current/"
 
 # 104 RawFtg_X/RAWSHOWS
-"$syno_rsync" "${rawfin_rsync_args[@]}" --log-file="${logfile_104_RawFtg}" --filter="merge raw_filter" "/volume1/104/RawFtg_X/" "rsync://rsyncer@192.168.77.105/RawFinBkup/raw/current/"
+"$syno_rsync" "${rawfin_rsync_args[@]}" --log-file="${logfile_104_RawFtg}" --filter="merge ${backup_directory}/raw_filter" "/volume1/104/RawFtg_X/" "rsync://rsyncer@192.168.77.105/RawFinBkup/raw/current/"
