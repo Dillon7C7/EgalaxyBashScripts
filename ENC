@@ -12,17 +12,21 @@ if [ "$#" -ne "3" ] ; then
   exit 1
 fi
 
-name_date=$1
-source_dir=$2
-segment_idx=$3
-real_frame_rate=$(${ffprobe} "${opts[@]}" "${source_dir}/${segment_idx}.mov")
-frame_rate="${real_frame_rate%/*}"
-truncated_fr="${frame_rate:0:2}"
+name_date="$1"
+source_dir="$2"
+segment_idx="$3"
 
-# make sure the frame rate is 30
-if [ "${frame_rate}" -ne "30000" ]; then
-	echo "ERROR!!!! Segment does not have a frame rate of 30 !!" >&2
-	echo "Frame rate is ${truncated_fr}" >&2
+# ${ffprobe_frame_rate} should be of the form num/num.
+# Ex. 30000/1001 or 2997/100
+ffprobe_frame_rate="$(${ffprobe} "${opts[@]}" "${source_dir}/${segment_idx}.mov")"
+
+# Divide the numbers in ${ffprobe_frame_rate}
+real_frame_rate=$((ffprobe_frame_rate))
+
+# make sure the frame rate (rounded down) is 29
+if [ ${real_frame_rate} -ne 29 ]; then
+	echo "ERROR!!!! Segment does not have a floor frame rate of 29 !!" >&2
+	echo "Frame rate is ${real_frame_rate}" >&2
 	exit 1
 fi
 
