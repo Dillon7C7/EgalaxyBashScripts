@@ -22,6 +22,7 @@
 !/synology_backup.sh
 !/new_synology_backup.sh
 !/tmux_servers.sh
+!/ddns_cron.bash
 !/rsync_filters/
 !/rsync_filters/*
 !/rsync_filters/unused_filters/
