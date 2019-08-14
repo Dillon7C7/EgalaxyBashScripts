@@ -6,7 +6,7 @@
 #+ $2: optional non-zero exit code. default 1
 print_error_and_exit()
 {
-	echo "ERROR ${0#./}: $1" >&2
+	echo "ERROR $(basename $0): $1" >&2
 
 	# use exit code of 1, otherwise use supplied exit code
 	[ $# -eq 1 ] && exit 1 || exit $2
