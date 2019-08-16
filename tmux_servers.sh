@@ -2,24 +2,42 @@
 
 session_work="work"			# session for workflow
 session_ssh="servers"		# session for remote administration
-in_tmux=					# used to determine if we are currently in tmux
-send_output="current"		# used to determine where to send output, (focused terminal or tmux session)
+#in_tmux=					# used to determine if we are currently in tmux
+work_exists=				# used to determine if the work session already exists
+admin_exists=				# used to determine if the admin session already exists
 
 declare -a success_hosts	# array of pinged hosts that replied
 declare -a failure_hosts	# array of pinged hosts that did not reply
-declare -a output_msg		# array of strings containing output of ssh attempts
 
 # list of LAN hosts from /etc/hosts
-host_list=("rawfinbackup" "222backup" "104backup" "miscbackup" "NakedFiles")
+host_list=("rawfinbackup" "222backup" "104backup" "miscbackup" "NakedFiles" "manilla")
 
-# function used to create a work session
+# temporary log file
+output_file="$(mktemp -p /tmp/ $$-$(basename "${0}").XXXXXXXX)"
+
+#  print an error;
+#+ $1 is the message
+#+ $2 is the optional output file
+print_error()
+{
+	# if $2 is a file and writable, append to it
+	if [ -w "$2" ]; then
+		echo "ERROR $(basename $0): $1" 1>&2 >> "$2"
+	else
+		echo "ERROR $(basename $0): $1" 1>&2
+	fi
+}
+
+# create a work session
 create_work_session() 
 {
 	# make sure the session doesn't already exist
 	grep -Eq "^${session_work}: .+" <<< "$(tmux list-sessions)"
 	
+	# sucessfully grepped text, meaning the session already exists
 	if [ $? -eq 0 ]; then
-		#echo "ERROR: session ${session_work} already exists!" >&2
+		print_error "Session ${session_work} init failed!" "$output_file" 1>&2 #>> "$output_file"
+		work_exists="y"
 		return 1
 	fi
 	
@@ -35,17 +53,22 @@ create_work_session()
 	# cd into today directory
 	tmux send-keys -t "${session_work}:0.0" 'cd /home/encoder/w/today' C-m
 
+	echo "Successfully created session ${session_work}" >> "$output_file"
+	work_exists="n"
+
 	return 0
 }
 
-# function used to create an admin. session
+# create an admin. session
 create_admin_session()
 {
 	# make sure the session doesn't already exist
 	grep -Eq "^${session_ssh}: .+" <<< "$(tmux list-sessions)"
 	
+	# sucessfully grepped text, meaning the session already exists
 	if [ $? -eq 0 ]; then
-		#echo "ERROR: session ${session_ssh} already exists!" >&2
+		print_error "Session ${session_ssh} init failed!" 1>&2 >> "$output_file"
+		admin_exists="y"
 		return 1
 	fi
 
@@ -56,76 +79,88 @@ create_admin_session()
 	for window in "${!host_list[@]}"; do
 	
 		# make sure host is up by sending an ICMP packet, ttl 1 second
-		ping -c1 -t1 "${host_list[$window]}" 2>&1 >/dev/null
+		ping -c1 -t2 "${host_list[${window}]}" 2>&1 >/dev/null
 	
 		# if the host is pingable, add hostname to a 'success' array
 		if [ $? -eq 0 ]; then
-			success_hosts+=("${host_list[$window]}")
+			success_hosts+=("${host_list[${window}]}")
 		# otherwise, add hostname to a 'failure' array and continue with next host
 		else
-			failure_hosts+=("${host_list[$window]}")
+			failure_hosts+=("${host_list[${window}]}")
 			continue
 		fi
 	
 		# rename the first window; create all other windows
 		if [ $window -eq 0 ]; then
 			# rename automatically created window 0
-			tmux rename-window -t "${session_ssh}:${window}" "${host_list[$window]}"
+			tmux rename-window -t "${session_ssh}:${window}" "${host_list[${window}]}"
 		else
 			# create window with the name of the host to be connected to
-			tmux new-window -t "${session_ssh}:${window}" -n "${host_list[$window]}"
+			tmux new-window -t "${session_ssh}:${window}" -n "${host_list[${window}]}"
 		fi
 	
 		# send the ssh command to the tmux window
-		tmux send-keys -t "${session_ssh}:${window}" "ssh '${host_list[$window]}'" ENTER
+		tmux send-keys -t "${session_ssh}:${window}" "ssh '${host_list[${window}]}'" ENTER
 	done
+
+	echo "Successfully created session ${session_ssh}" >> "$output_file"
+	admin_exists="n"
 
 	return 0
 }
 
+# for visibility
+echo -e "\n######################################################\n" >> "$output_file"
+
 create_work_session
-if [ $? -ne 0 ]; then
-	output_msg+="ERROR: session ${session_work} init failed!\n"
-	send_output="${session_work}"
-else
-	output_msg+="Successfully created session ${session_work}\n"
-fi
-
 create_admin_session
-if [ $? -ne 0 ]; then
-	output_msg+="ERROR: session ${session_ssh} init failed!\n"
-#	# if create_work_session() failed, send output to ssh session
-#	[ "$send_output" != "work" ] && send_output="${session_ssh}"
-else
-	output_msg+="Successfully created session ${session_ssh}\n"
+
+# if both sessions already exist, exit script abruptly
+if [ "$work_exists" == "y" ] && [ "$admin_exists" == "y" ]; then
+	print_error "Both sessions already exist!!" 1>&2 >> "$output_file"
+	cat "$output_file" && rm -f "$output_file"
+	exit 1
 fi
 
-# handle output for successful connections
-if [ $((${#success_hosts[@]})) -gt 0 ]; then
-	output_msg+="Successfully connected to the following hosts: ${success_hosts[*]} on session ${session_work}\n"
+# if the admin session didn't already exist, create output for result of ssh attempts
+if [ "$admin_exists" != "y" ]; then
 
-# if all hosts are down (i.e. success array is empty), there likely is a LAN connection problem
-else 
-	output_msg+="All hosts are down! Perhaps check your LAN connection.\n"
+	# handle output for successful connections
+	if [ $((${#success_hosts[@]})) -gt 0 ]; then
+		echo "Successfully connected to the following hosts: ${success_hosts[*]} on session ${session_ssh}" >> "$output_file"
+	
+	# if all hosts are down (i.e. success array is empty), there likely is a LAN connection problem
+	else 
+		echo "All hosts are down! Perhaps check your LAN connection." >> "$output_file"
+	fi
+
+	# handle output for failed connections, if any
+	if [ $((${#failure_hosts[@]})) -gt 0 ]; then
+		echo "Could not connect to the following hosts: ${failure_hosts[*]}" >> "$output_file"
+	
+	# no failed ping attempts
+	else
+		echo "Completed without error!" >> "$output_file"
+	fi
 fi
 
-# handle output for failed connections
-if [ $((${#failure_hosts[@]})) -gt 0 ]; then
-	output_msg+="Could not connect to the following hosts: ${failure_hosts[*]}\n"
-else
-	output_msg+="Completed without error!\n"
-fi
+# for visibility
+echo -e "\n######################################################\n" >> "$output_file"
 
 # send output_msg to bottom-left pane of window 0 of session "work", otherwise current tty
-if [ "$send_output" == "${session_work}" ]; then
-	tmux send-keys -t "${session_work}:0.1" "echo -en '${output_msg}'" ENTER
+if [ "$work_exists" != "y" ]; then
+
+	tmux send-keys -t "${session_work}:0.1" "cat '${output_file}'" ENTER
+	tmux wait-for -S output_channel
+	tmux send-keys -t "${session_work}:0.1" "rm -f '${output_file}'" ENTER
+	tmux wait-for output_channel
 else
-	echo -en "${output_msg}"
+	cat "${output_file}" && rm -f "$output_file"
 fi
 
-# if not connected to a tmux server ($TMUX is unset), attach to session
-# otherwise, switch to session
-if [ -z "${TMUX+x}" ]; then
+#  if not connected to a tmux server ($TMUX is unset or not null), attach to session
+#+ otherwise, switch to session
+if [ -z "${TMUX:+x}" ]; then
 	tmux attach -t "${session_work}"
 else
 	tmux switch-client -t "${session_work}"
