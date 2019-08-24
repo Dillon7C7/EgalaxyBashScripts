@@ -1,10 +1,9 @@
 #!/bin/bash
 
-session_work="work"			# session for workflow
+session_work="encoder"		# session for workflow
 session_ssh="servers"		# session for remote administration
-#in_tmux=					# used to determine if we are currently in tmux
-work_exists=				# used to determine if the work session already exists
-admin_exists=				# used to determine if the admin session already exists
+work_existed=				# used to determine if the work session already exists
+admin_existed=				# used to determine if the admin session already exists
 
 declare -a success_hosts	# array of pinged hosts that replied
 declare -a failure_hosts	# array of pinged hosts that did not reply
@@ -12,20 +11,19 @@ declare -a failure_hosts	# array of pinged hosts that did not reply
 # list of LAN hosts from /etc/hosts
 host_list=("rawfinbackup" "222backup" "104backup" "miscbackup" "NakedFiles" "manilla")
 
-# temporary log file
-output_file="$(mktemp -p /tmp/ $$-$(basename "${0}").XXXXXXXX)"
+# temporary log file that will contain echo commands to source
+output_file="$(mktemp -p /tmp/ $$-$(basename "${0%.sh}").XXXXXXXX)"
 
-#  print an error;
-#+ $1 is the message
-#+ $2 is the optional output file
-print_error()
+# redirect 'echo $1' stdout to $output_file, which will be sourced
+print_stdout()
 {
-	# if $2 is a file and writable, append to it
-	if [ -w "$2" ]; then
-		echo "ERROR $(basename $0): $1" 1>&2 >> "$2"
-	else
-		echo "ERROR $(basename $0): $1" 1>&2
-	fi
+	echo 'echo '"$1" >> "$output_file"
+}
+
+# redirect 'echo $1' stderr to $output_file, which will be sourced
+print_stderr()
+{
+	echo 'echo '"ERROR $(basename $0): $1"' 1>&2' >> "$output_file"
 }
 
 # create a work session
@@ -36,8 +34,8 @@ create_work_session()
 	
 	# sucessfully grepped text, meaning the session already exists
 	if [ $? -eq 0 ]; then
-		print_error "Session ${session_work} init failed!" "$output_file" 1>&2 #>> "$output_file"
-		work_exists="y"
+		print_stderr "Session ${session_work} init failed!"
+		work_existed="y"
 		return 1
 	fi
 	
@@ -51,10 +49,10 @@ create_work_session()
 	tmux split-window -d -v -t "${session_work}:0.2"		# bot-right	0.3
 
 	# cd into today directory
-	tmux send-keys -t "${session_work}:0.0" 'cd /home/encoder/w/today' C-m
+	tmux send-keys -t "${session_work}:0.0" 'cd /home/encoder/w/today' ENTER
 
-	echo "Successfully created session ${session_work}" >> "$output_file"
-	work_exists="n"
+	print_stdout "Successfully created session ${session_work}"
+	work_existed="n"
 
 	return 0
 }
@@ -67,8 +65,8 @@ create_admin_session()
 	
 	# sucessfully grepped text, meaning the session already exists
 	if [ $? -eq 0 ]; then
-		print_error "Session ${session_ssh} init failed!" 1>&2 >> "$output_file"
-		admin_exists="y"
+		print_stderr "Session ${session_ssh} init failed!"
+		admin_existed="y"
 		return 1
 	fi
 
@@ -103,59 +101,66 @@ create_admin_session()
 		tmux send-keys -t "${session_ssh}:${window}" "ssh '${host_list[${window}]}'" ENTER
 	done
 
-	echo "Successfully created session ${session_ssh}" >> "$output_file"
-	admin_exists="n"
+	print_stdout "Successfully created session ${session_ssh}"
 
-	return 0
-}
-
-# for visibility
-echo -e "\n######################################################\n" >> "$output_file"
-
-create_work_session
-create_admin_session
-
-# if both sessions already exist, exit script abruptly
-if [ "$work_exists" == "y" ] && [ "$admin_exists" == "y" ]; then
-	print_error "Both sessions already exist!!" 1>&2 >> "$output_file"
-	cat "$output_file" && rm -f "$output_file"
-	exit 1
-fi
-
-# if the admin session didn't already exist, create output for result of ssh attempts
-if [ "$admin_exists" != "y" ]; then
-
+	# if the admin session didn't already exist, generate output for results of ssh attempts
 	# handle output for successful connections
 	if [ $((${#success_hosts[@]})) -gt 0 ]; then
-		echo "Successfully connected to the following hosts: ${success_hosts[*]} on session ${session_ssh}" >> "$output_file"
+		print_stdout "Successfully connected to the following hosts: ${success_hosts[*]} on session ${session_ssh}"
 	
 	# if all hosts are down (i.e. success array is empty), there likely is a LAN connection problem
 	else 
-		echo "All hosts are down! Perhaps check your LAN connection." >> "$output_file"
+		print_stderr "All hosts are down! Perhaps check your LAN connection."
 	fi
 
 	# handle output for failed connections, if any
 	if [ $((${#failure_hosts[@]})) -gt 0 ]; then
-		echo "Could not connect to the following hosts: ${failure_hosts[*]}" >> "$output_file"
+		print_stderr "Could not connect to the following hosts: ${failure_hosts[*]}"
 	
 	# no failed ping attempts
 	else
-		echo "Completed without error!" >> "$output_file"
+		print_stdout "Completed without error!"
 	fi
-fi
+
+	admin_existed="n"
+
+	return 0
+}
+
+# source $output_file and rm it
+source_and_rm()
+{
+	# for visibility
+	echo 'echo -e "\n######################################################\n" 2>&1' >> "$output_file"
+	source "$output_file" && rm -f "$output_file"
+}
 
 # for visibility
-echo -e "\n######################################################\n" >> "$output_file"
+echo 'echo -e "\n######################################################\n" 2>&1' >> "$output_file"
 
-# send output_msg to bottom-left pane of window 0 of session "work", otherwise current tty
-if [ "$work_exists" != "y" ]; then
+create_work_session
+create_admin_session
 
-	tmux send-keys -t "${session_work}:0.1" "cat '${output_file}'" ENTER
+# if both sessions already exist, source output on current tty, then exit script abruptly
+if [ "$work_existed" == "y" ] && [ "$admin_existed" == "y" ]; then
+	print_stderr "Both sessions already exist!!"
+	source_and_rm
+	exit 1
+
+# send output_msg to bottom-left pane of window 0 of session "encoder", otherwise current tty
+elif [ "$work_existed" != "y" ]; then
+
+	# for visibility
+	echo 'echo -e "\n######################################################\n" 2>&1' >> "$output_file"
+
+	tmux send-keys -t "${session_work}:0.1" "source '${output_file}'" ENTER
 	tmux wait-for -S output_channel
 	tmux send-keys -t "${session_work}:0.1" "rm -f '${output_file}'" ENTER
 	tmux wait-for output_channel
+
+# if work session didn't exist, source output on current tty
 else
-	cat "${output_file}" && rm -f "$output_file"
+	source_and_rm
 fi
 
 #  if not connected to a tmux server ($TMUX is unset or not null), attach to session
