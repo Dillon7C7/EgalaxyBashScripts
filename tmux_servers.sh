@@ -12,7 +12,9 @@ declare -a failure_hosts	# array of pinged hosts that did not reply
 host_list=("rawfinbackup" "222backup" "104backup" "miscbackup" "NakedFiles" "manilla")
 
 # temporary log file that will contain echo commands to source
-output_file="$(mktemp -p /tmp/ $$-$(basename "${0%.sh}").XXXXXXXX)"
+output_file="$(mktemp -p /tmp/ $$-"$(basename "${0%.sh}")".XXXXXXXX)"
+
+#################### START OF FUNCTION DECLARATIONS ##################
 
 # redirect 'echo $1' stdout to $output_file, which will be sourced
 print_stdout()
@@ -76,7 +78,7 @@ create_admin_session()
 	# attempt to ssh into every local server
 	for window in "${!host_list[@]}"; do
 	
-		# make sure host is up by sending an ICMP packet, ttl 1 second
+		# make sure host is up by sending an ICMP packet, ttl 2 seconds
 		ping -c1 -t2 "${host_list[${window}]}" 2>&1 >/dev/null
 	
 		# if the host is pingable, add hostname to a 'success' array
@@ -104,8 +106,9 @@ create_admin_session()
 	print_stdout "Successfully created session ${session_ssh}"
 
 	# if the admin session didn't already exist, generate output for results of ssh attempts
+
 	# handle output for successful connections
-	if [ $((${#success_hosts[@]})) -gt 0 ]; then
+	if [[ $((${#success_hosts[@]})) -gt 0 ]]; then
 		print_stdout "Successfully connected to the following hosts: ${success_hosts[*]} on session ${session_ssh}"
 	
 	# if all hosts are down (i.e. success array is empty), there likely is a LAN connection problem
@@ -114,7 +117,7 @@ create_admin_session()
 	fi
 
 	# handle output for failed connections, if any
-	if [ $((${#failure_hosts[@]})) -gt 0 ]; then
+	if [[ $((${#failure_hosts[@]})) -gt 0 ]]; then
 		print_stderr "Could not connect to the following hosts: ${failure_hosts[*]}"
 	
 	# no failed ping attempts
@@ -135,37 +138,46 @@ source_and_rm()
 	source "$output_file" && rm -f "$output_file"
 }
 
+#################### END OF FUNCTION DECLARATIONS ####################
+
+#################### Start of "main()" ###############################
+
 # for visibility
 echo 'echo -e "\n######################################################\n" 2>&1' >> "$output_file"
 
 create_work_session
 create_admin_session
 
-# if both sessions already exist, source output on current tty, then exit script abruptly
-if [ "$work_existed" == "y" ] && [ "$admin_existed" == "y" ]; then
-	print_stderr "Both sessions already exist!!"
-	source_and_rm
-	exit 1
+if [[ "$work_existed" == "y" ]]; then
 
-# send output_msg to bottom-left pane of window 0 of session "encoder", otherwise current tty
-elif [ "$work_existed" != "y" ]; then
+	# if both sessions already exist, source output on current tty, then exit script abruptly
+	if [[ "$admin_existed" == "y" ]]; then
+		print_stderr "Both sessions already exist!!"
+		source_and_rm
+		exit 1
+
+	# source output on current tty
+	else # [[ "$admin_existed" != "y" ]]
+		source_and_rm
+	fi
+
+#  send output_msg to bottom-left pane of window 0 of session "encoder"
+#+ if this script created it
+else # [[ "$work_existed" != "y" ]]
 
 	# for visibility
 	echo 'echo -e "\n######################################################\n" 2>&1' >> "$output_file"
 
+	# source_and_rm() manually by sending keys to tmux pane
 	tmux send-keys -t "${session_work}:0.1" "source '${output_file}'" ENTER
 	tmux wait-for -S output_channel
 	tmux send-keys -t "${session_work}:0.1" "rm -f '${output_file}'" ENTER
 	tmux wait-for output_channel
-
-# if work session didn't exist, source output on current tty
-else
-	source_and_rm
 fi
 
 #  if not connected to a tmux server ($TMUX is unset or not null), attach to session
 #+ otherwise, switch to session
-if [ -z "${TMUX:+x}" ]; then
+if [[ -z "${TMUX:+x}" ]]; then
 	tmux attach -t "${session_work}"
 else
 	tmux switch-client -t "${session_work}"
