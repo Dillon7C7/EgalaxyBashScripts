@@ -1,17 +1,17 @@
 #!/bin/bash
 
-
 FFMPEG=/usr/bin/ffmpeg
 HB=/usr/local/bin/HandBrakeCLI
 WM_DIR=./watermarks
 
 ffprobe=/usr/bin/ffprobe
-opts=( -v error -select_streams v -show_entries stream=r_frame_rate -of csv=p=0 )
- 
+frame_opts=( -v error -select_streams v -show_entries stream=r_frame_rate -of csv=p=0 )
+codec_opts=( -v error -select_streams v -show_entries stream=codec_name \
+	-of default=noprint_wrappers=1:nokey=1 )
 
 if [ "$#" -ne 1 ] || ! [ -f "$1" ]; then
-  echo "Usage: $0 file" >&2
-  exit 1
+	echo "Usage: $0 file" >&2
+	exit 1
 fi
 
 INPUT="$1"
@@ -27,6 +27,15 @@ real_frame_rate=$((ffprobe_frame_rate))
 if [ "${real_frame_rate}" -ne 29 ]; then
 	echo "ERROR!!!! Segment does not have a floor frame rate of 29 !!" >&2
 	echo "Frame rate is ${real_frame_rate}" >&2
+	exit 1
+fi
+
+# Check video codec of segment; should be Apple ProRes 422 ("prores")
+video_codec="$(${ffprobe} "${codec_opts[@]}" "${INPUT}")"
+
+if [[ "$video_codec" != "prores" ]]; then
+	echo "ERROR!!!! Segment was not encoded with Apple ProRes 422 !!" >&2
+	echo "Video codec is ${video_codec}" >&2
 	exit 1
 fi
 

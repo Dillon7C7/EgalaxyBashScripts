@@ -2,7 +2,9 @@
 
 pv=/usr/bin/pv
 ffprobe=/usr/bin/ffprobe
-opts=( -v error -select_streams v -show_entries stream=r_frame_rate -of csv=p=0 )
+frame_opts=( -v error -select_streams v -show_entries stream=r_frame_rate -of csv=p=0 )
+codec_opts=( -v error -select_streams v -show_entries stream=codec_name \
+	-of default=noprint_wrappers=1:nokey=1 )
 
 if [ "$#" -ne "3" ] ; then
   echo "Usage: $0 YYYY-MM-DD Source_Folder  segment_number" >&2
@@ -18,7 +20,7 @@ segment_idx="$3"
 
 # ${ffprobe_frame_rate} should be of the form num/num.
 # Ex. 30000/1001 or 2997/100
-ffprobe_frame_rate="$(${ffprobe} "${opts[@]}" "${source_dir}/${segment_idx}.mov")"
+ffprobe_frame_rate="$(${ffprobe} "${frame_opts[@]}" "${source_dir}/${segment_idx}.mov")"
 
 # Divide the numbers in ${ffprobe_frame_rate}
 real_frame_rate=$((ffprobe_frame_rate))
@@ -27,6 +29,15 @@ real_frame_rate=$((ffprobe_frame_rate))
 if [ ${real_frame_rate} -ne 29 ]; then
 	echo "ERROR!!!! Segment does not have a floor frame rate of 29 !!" >&2
 	echo "Frame rate is ${real_frame_rate}" >&2
+	exit 1
+fi
+
+# Check video codec of segment; should be Apple ProRes 422 ("prores")
+video_codec="$(${ffprobe} "${codec_opts[@]}" "${source_dir}/${segment_idx}.mov")"
+
+if [[ "$video_codec" != "prores" ]]; then
+	echo "ERROR!!!! Segment was not encoded with Apple ProRes 422 !!" >&2
+	echo "Video codec is ${video_codec}" >&2
 	exit 1
 fi
 
