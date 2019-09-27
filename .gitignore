@@ -21,6 +21,7 @@
 !/upload2Beer.sh
 !/synology_backup.sh
 !/new_synology_backup.sh
+!/id3tagger.bash
 !/tmux_servers.sh
 !/ddns_cron.bash
 !/rsync_filters/
