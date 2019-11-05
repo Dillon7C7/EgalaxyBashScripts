@@ -24,6 +24,7 @@
 !/id3tagger.bash
 !/tmux_servers.sh
 !/ddns_cron.bash
+!/post_enc_promo.bash
 !/rsync_filters/
 !/rsync_filters/*
 !/rsync_filters/unused_filters/
