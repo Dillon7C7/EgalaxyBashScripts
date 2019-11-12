@@ -39,7 +39,7 @@ remote_default_dp='1080_1.mp4'                      # default name for promo aft
 remote_dp="${remote_dp_dir}${remote_default_dp}"    # absolute path to default remote dp
 
 social_regex='^\./720_welcome_[0-9]\{4\}\.mp4$'     # escape { and } because variables in the heredoc are expanded by bash
-nude_regex='^\./1080_welcome_[0-9]\{4\}\.mp4$'      # escape { and } because variables in the heredoc are expanded by bash
+one_regex='^\./1080_welcome_[0-9]\{4\}\.mp4$'       # escape { and } because variables in the heredoc are expanded by bash
 
 local_dir='LOCAL_DIR'                        # destination path for scp promo
 promo="${today_date}_DP_1080.mp4"                   # yyyy-mm-dd_DP_1080.mp4
@@ -279,7 +279,7 @@ social()
 	ssh_ecode=$?
 
 	# the heredoc returns this particular exit code if the number of regex matches is not 1
-	[ $ssh_ecode -eq $ecode_remote_dp_fail ] && print_error_and_exit "Either the social promo wasn't found, or there are too many files that match the social regex on ${remote_host}!"
+	[ $ssh_ecode -eq $ecode_remote_dp_fail ] && print_error_and_exit "Either the 'social' promo wasn't found, or there are too many files that match the social regex on ${remote_host}!"
 	[ $ssh_ecode -ne 0 ] && print_error_and_exit "ssh in social() failed!"
 }
 
