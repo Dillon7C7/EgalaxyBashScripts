@@ -196,10 +196,6 @@ copy_and_upload_dp()
 	elif [ -z "${flag_start_ssh_master:+x}" ]; then
 		print_error_and_exit "Run start_ssh_master() first!"
 
-	# idempotently make sure file doesn't exist on local first, to prevent a second run from transferring again
-	elif [ -f "${local_dp}" ]; then
-		print_error_and_exit "${local_dp} already exists; script was already ran today!"
-
 	# if the '--default' option is given...
 	elif [ -n "${flag_default:+x}" ]; then
 
@@ -250,6 +246,11 @@ copy_and_upload_dp()
 # default function; copy the DP from remote, rename, and upload to beer
 default()
 {
+	# idempotently make sure file doesn't exist on local first, to prevent a second run from transferring again
+	if [ -f "${local_dp}" ]; then
+		print_error_and_exit "${local_dp} already exists; script was already ran today!"
+	fi
+
 	# copy file from work station
 	scp -o ControlPath=${ssh_control_socket} "${remote_host}:${remote_dp}" "${local_dp}" &>/dev/null
 	[ $? -eq 0 ] || print_error_and_exit "scp of promo failed!"
@@ -286,6 +287,11 @@ social()
 # copy the "one" DP from remote, rename, upload to beer
 one()
 {
+	# idempotently make sure file doesn't exist on local first, to prevent a second run from transferring again
+	if [ -f "${local_dp}" ]; then
+		print_error_and_exit "${local_dp} already exists; script was already ran today!"
+	fi
+
 	ssh -T -o ControlPath=${ssh_control_socket} "${remote_host}" /bin/sh <<- ONE_HEREDOC
 
 		cd -P ${remote_dp_dir}
