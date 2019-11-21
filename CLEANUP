@@ -66,10 +66,12 @@ fi
 
 echo "Running Cleanup !!!!!!"
 
-mv ${WORK_DIR}/done_archive/sk/out/*.mp4 ${WORK_DIR}/done_archive/sk/old/
+mv ${WORK_DIR}/done_archive/sk/out/*.mp4 ${WORK_DIR}/done_archive/sk/old/ 2>/dev/null
 
 rm -f ${WORK_DIR}/*.mp4
 rm -f ${WORK_DIR}/*.mp3
 rm -f ${WORK_DIR}/*.mov
 rm -f ${WORK_DIR}/ffmpeg2pass*
+rm -f ${WORK_DIR}/show_live_done
+/bin/bash "${WORK_DIR}/clear_space.sh"
 ssh USER@REMOTE_HOST "${remote_cmd}"
