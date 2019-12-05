@@ -35,9 +35,9 @@ inputter()
 
 		file="$1"
 
-		# file name must end in .aac
+		# file name must end in .mp4
 		if [[ "${file:(-4):4}" != "$file_suffix" ]]; then
-			print_usage "${file} does not end in .aac!"
+			print_usage "${file} does not end in ${file_suffix}!"
 		fi
 
 		# else file is good
@@ -73,9 +73,10 @@ grabber()
 init_tags()
 {
 	if [ $string_count -ge $string_limit ]; then
-		print_usage "Too many id3v2 tags provided. Maximum 3: ARTIST TITLE ALBUM"
+		print_usage "Too many metadta tags provided. Maximum 3: ARTIST TITLE ALBUM"
 	fi
 
+	# increase the number of strings given
 	string_count=$((string_count+1))
 
 	case $string_count in
@@ -104,7 +105,7 @@ post_loop_check()
 		if [[ "$file" =~ $file_regex ]]; then
 
 			# make sure that at least 1 string was provided 
-			[ $string_count -eq 0 ] && print_usage "No id3v2 data was given!"
+			[ $string_count -eq 0 ] && print_usage "No metadata was given!"
 
 			# use the last string provided; loop in reverse
 			for string in "$album" "$title" "$artist"; do
@@ -119,12 +120,12 @@ post_loop_check()
 		
 		# file name does not match regex
 		else
-			print_usage "When using [-g,--grab], FILE must exist and be of the form 'ARTIST - TITLE.aac'."
+			print_usage "When using [-g,--grab], FILE must exist and be of the form 'ARTIST - TITLE.mp4'."
 		fi
 
 	# -g flag was not given
 	else
-		[ $string_count -ne 3 ] && print_usage "Not enough id3v2 tags were given!"
+		[ $string_count -ne 3 ] && print_usage "Not enough metadata tags were given!"
 	fi
 }
 
@@ -132,10 +133,10 @@ string_count=0                 # used to keep track of the number of strings pro
 string_limit=3                 # maximum number of strings allowed
 i_given=                       # assign this to something to cause a second -i to break the script
 g_given=                       # assign this to something to cause a second -g to break the script
-first_arg=                     # assign this to something to ignore special case first arg functuion
+first_arg=                     # assign this to something to ignore special case first arg function
 
-file_regex='^(.+) - (.+).aac'  # E.g. 'BAND NAME - SONG NAME.aac'
-file_suffix='.aac'             # suffix of permitted file name
+file_regex='^(.+) - (.+).mp4'  # E.g. 'BAND NAME - SONG NAME.mp4'
+file_suffix='.mp4'             # suffix of permitted file name
 file=                          # assign this to something to indicate that a file has been found
 artist=                        # assign this to something to indicate that an artist has been found
 title=                         # assign this to something to indicate that a title has been found
@@ -172,8 +173,24 @@ done
 # make sure we have all the data we need
 post_loop_check
 
-/usr/bin/env id3v2 -a "$artist" "$file"
-/usr/bin/env id3v2 -t "$title" "$file"
-/usr/bin/env id3v2 -A "$album" "$file"
+ffmpeg -i "$file" -metadata artist="${artist}" -metadata title="${title}" -metadata album="${album}" \
+	-vn -acodec copy -f mp4 "${file/%mp4/m4a}"
 
-/usr/bin/ffprobe "$file" 2> >(grep -A5 Metadata)
+IFS= read -r -d '' awkVariable << "AWK_EOF"
+BEGIN { print ""; }
+!found && /Metadata:/ {
+	found = 1;
+	num_lines_to_print=8+1;
+}
+
+# next line...
+{
+	if (num_lines_to_print) {
+		print;
+		num_lines_to_print--;
+	}
+}
+END { print ""; }
+AWK_EOF
+
+/usr/bin/ffprobe "$file" 2> >(awk "$awkVariable")
