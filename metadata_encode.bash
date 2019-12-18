@@ -193,4 +193,4 @@ BEGIN { print ""; }
 END { print ""; }
 AWK_EOF
 
-/usr/bin/ffprobe "$file" 2> >(awk "$awkVariable")
+/usr/bin/ffprobe "${file/%mp4/m4a}" 2> >(awk "$awkVariable")
