@@ -1,20 +1,23 @@
 #!/bin/sh
 
-if [ "$#" -ne 3 ] ; then
-  echo "Usage: $0  Source_Folder  file_name resolution" >&2
-  echo "Ex: $0 today  BTL-HannaOrio-60sec.mov   1080" >&2
-  echo "Ex: $0 friday  BTL-HannaOrio-60sec.mov   720" >&2
+if [ $# -lt 2 ] || [ $# -gt 3 ]; then
+  printf "%s\\n" "Usage: $0  Source_Folder/file_name resolution [ph]">&2
+  printf "%s\\n" "Ex: $0 today/BTL-HannaOrio-60sec.mov 1080" >&2
+  printf "%s\\n" "Ex: $0 friday/BTL-HannaOrio-60sec.mov 720 ph" >&2
   exit 1
 fi
 
-# ./gsk_encode.sh BTL-HannaOrio-60sec.mov ; ./gWM.sh BTL-HannaOrio-60sec.mov ;./g1080_enc.sh BTL-HannaOrio-60sec.mov
-source_dir=$1
-filename="$2"
-resolution=$3
+source_dir="${1%/*}"
+filename="${1##*/}"
+resolution=$2
+ph="$3"
 
+cp "${source_dir}/${filename}" ./"${filename}"
 
-cp  "${source_dir}/${filename}"  ./"${filename}"
+./gsk_encode.sh "${filename}"
 
-./gsk_encode.sh "${filename}" ;
-./gWM.sh "${filename}"  ;
+# if $3 was not given, or it is not a case sensitive match of "ph", add WM
+if [ -z "${ph:+x}" ] || [ $(printf "%s" "$ph" | tr '[:upper:]' '[:lower:]') != ph ]; then
+	./gWM.sh "${filename}"
+fi
 ./g${resolution}_enc.sh "${filename}"
