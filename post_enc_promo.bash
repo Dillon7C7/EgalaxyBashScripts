@@ -3,11 +3,11 @@
 today_date="$(date +%F)"                # yyyy-mm-dd
 
 ################## TERMINAL COLOR VARIABLE ASSIGNMENT BEGINS ###############################
-color_red='\033[31m'
-color_green='\033[32m'
-color_yellow='\033[33m'
-color_magenta='\033[35m'
-color_reset='\033[0m'
+color_red=$(tput setaf 1)
+color_green=$(tput setaf 2)
+color_yellow=$(tput setaf 3)
+color_magenta=$(tput setaf 4)
+color_reset=$(tput sgr0)
 ################## TERMINAL COLOR VARIABLE ASSIGNMENT ENDS #################################
 
 ################## EXIT CODE VARIABLE ASSIGNMENT BEGINS ####################################
