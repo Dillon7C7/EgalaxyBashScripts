@@ -68,7 +68,7 @@ subject="New Files From NN (${today_date_msg})"
 ################## EMAIL VARIABLE ASSIGNMENT ENDS ##########################################
 
 # take care of script locking
-trap_and_lock()
+locking()
 {
 	# if lock is successful...
 	if mkdir "${lockdir}" &>/dev/null; then
@@ -386,7 +386,11 @@ MAIL_HEREDOC
 send_email()
 {
 	create_email | msmtp --account=egalaxy --read-recipients
-	[ $? -eq 0 ] && flag_send_email="y"
+
+	if [ $? -eq 0 ]; then
+		flag_send_email="y"
+		printf "%s\\n" "Email sent!"
+	fi
 }
 
 # cleanup function; "$1" is a passed in exit code
@@ -426,6 +430,6 @@ cleanup()
 }
 
 # set up traps and locking
-trap_and_lock
+locking
 
 parse_args "$@" && start_ssh_master && copy_and_upload_dp
