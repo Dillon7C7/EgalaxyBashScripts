@@ -430,6 +430,7 @@ cleanup()
 }
 
 # set up traps and locking
+trap 'ecode=$?; printf "%s\\n" "Exit code: ${ecode}."' EXIT
 locking
 
 parse_args "$@" && start_ssh_master && copy_and_upload_dp
