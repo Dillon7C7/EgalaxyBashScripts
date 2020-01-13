@@ -26,6 +26,7 @@
 !/tmux_servers.sh
 !/ddns_cron.bash
 !/post_enc_promo.bash
+!/get_sa_vid_info.bash
 !/rsync_filters/
 !/rsync_filters/*
 !/rsync_filters/unused_filters/
