@@ -221,7 +221,7 @@ copy_and_upload_dp()
 
 		if [ -n "${flag_default:+x}" ]; then
 			default
-		elif [ -n "${flag_one:+}" ]; then
+		elif [ -n "${flag_one:+x}" ]; then
 			one
 		fi
 
@@ -230,7 +230,7 @@ copy_and_upload_dp()
 
 		if [ -n "${flag_default:+x}" ]; then
 			print_error_and_exit "The '--one' option must not be provided with the --default option!"
-		elif [ -n "${flag_social:+}" ]; then
+		elif [ -n "${flag_social:+x}" ]; then
 			social
 			one
 		else
