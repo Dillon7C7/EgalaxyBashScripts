@@ -139,7 +139,7 @@ backup()
 	unset -v rsync_ecode
 
 	# backup start time, before rsync transfers
-	backup_start_time="$(date +'%F %R')"
+	backup_start_time="$(date +'%F, %R')"
 	
 	for share in "${shares[@]}"
 	do
@@ -356,10 +356,10 @@ cleanup()
 	ecode="$2"
 
 	# time of backup completion
-	backup_end_time=$(date +'%F %R')
+	backup_end_time=$(date +'%F, %R')
 
 	# subject prefix for email
-	subject_prefix="[${script_name}] - (${backup_end_time} $(date +%R)) -"
+	subject_prefix="[${script_name}] - (${backup_end_time}) -"
 
 	# set if/when email needs a body (backup())
 	unset -v body
