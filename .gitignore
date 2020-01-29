@@ -23,7 +23,7 @@
 !/new_synology_backup.sh
 !/id3tagger.bash
 !/show_live.bash
-!/tmux_servers.sh
+!/tmux_setup.sh
 !/ddns_cron.bash
 !/post_enc_promo.bash
 !/get_sa_vid_info.bash
