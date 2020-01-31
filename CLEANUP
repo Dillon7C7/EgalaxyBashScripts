@@ -9,7 +9,6 @@ invalid_flag=false # if true, exit before rest of script
 print_flag=false # if true, don't print a newline on invalid flags
 
 remote_cmd='cd REMOTE_DIRECTORY;./.cleanup'
-dom_del=';cd domenic;./.cleanup'
 
 # print script usage
 print_usage()
@@ -59,9 +58,10 @@ if "$verbose_flag"; then
     set -x
 fi
 
-# modify remote command to include deleting dom's files
+#  modify remote command to include deleting dom's files:
+#+ a '-D' flag will be passed to remote .cleanup script to initiate it
 if "$dom_flag"; then
-    remote_cmd="${remote_cmd}${dom_del}"
+    remote_cmd="${remote_cmd} -D"
 fi
 
 echo "Running Cleanup !!!!!!"
