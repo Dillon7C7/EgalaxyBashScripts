@@ -97,13 +97,19 @@ create_admin_session()
 		printf "%s\\n" "Checking if ssh server is running on host ${host_list[${window}]}..."
 		tput sgr0
 
-		ssh "${host_list[${window}]}" true &>/dev/null </dev/null
+		ssh -o 'ConnectTimeout=5' "${host_list[${window}]}" true &>/dev/null </dev/null
 	
 		# if the host is pingable, add hostname to a 'success' array
 		if [ $? -eq 0 ]; then
+			tput setaf 2
+			printf "%s\\n" "ssh server is running on host ${host_list[${window}]}!"
+			tput sgr0
 			success_hosts+=("${host_list[${window}]}")
 		# otherwise, add hostname to a 'failure' array and continue with next host
 		else
+			tput setaf 1
+			printf "%s\\n" "ssh server is NOT running on host ${host_list[${window}]}!"
+			tput sgr0
 			failure_hosts+=("${host_list[${window}]}")
 			continue
 		fi
