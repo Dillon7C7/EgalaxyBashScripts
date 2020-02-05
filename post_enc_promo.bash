@@ -22,7 +22,7 @@ ecode_remote_dp_fail=4   # the remote promo was not found
 flag_help=               # flag for -h|--help argument
 flag_default=            # flag for -d|--default argument
 flag_social=             # flag for -s|--social argument
-flag_one=                # flag for -1|--one argument
+flag_alt=                # flag for -a|--alt argument
 flag_misc=               # flag for unsupported arguments
 ################## FLAGS FOR ARGUMENTS ENDS ################################################
 
@@ -35,11 +35,11 @@ flag_send_email=         # flag for send_email() successful completion
 ################## ACTUAL WORK VARIABLE ASSIGNMENT BEGINS ##################################
 remote_host='REMOTE_HOST'                               # 'remote' (work station) hostname
 remote_dp_dir='REMOTE_DP_DIR'             # remote path to promo
-remote_default_dp='1080_1.mp4'                      # default name for promo after download
-remote_dp="${remote_dp_dir}${remote_default_dp}"    # absolute path to default remote dp
+alt_default_dp='1080_1.mp4'                         # default name for alt promo after download
+remote_dp="${remote_dp_dir}${alt_default_dp}"       # absolute path to default remote dp
 
+default_regex='^\./1080_welcome_[0-9]\{4\}\.mp4$'   # escape { and } because variables in the heredoc are expanded by bash
 social_regex='^\./720_welcome_[0-9]\{4\}\.mp4$'     # escape { and } because variables in the heredoc are expanded by bash
-one_regex='^\./1080_welcome_[0-9]\{4\}\.mp4$'       # escape { and } because variables in the heredoc are expanded by bash
 
 local_dir='LOCAL_DIR'                        # destination path for scp promo
 promo="${today_date}_DP_1080.mp4"                   # yyyy-mm-dd_DP_1080.mp4
@@ -84,6 +84,7 @@ locking()
 		trap 'echo "Killed by a signal"; exit ${ecode_recvsig}' SIGHUP SIGINT SIGQUIT SIGTERM
 		echo "Got a lock!"
 
+		return 0
 	else
 
 		# lock failed, check to see if the lock file's PID's process is still alive
@@ -116,13 +117,25 @@ parse_args()
 	while [ $# -gt 0 ]; do
 		case "$1" in
 			-s|--social) flag_social="y" ;;
-			-1|--one) flag_one="y" ;;
+			-a|--alt) flag_alt="y" ;;
 			-d|--default) flag_default="y" ;;
 			-h|--help) flag_help="y" ;;
 			*) flag_misc="y" ;;
 		esac
 		shift 1
 	done
+
+	## handle these arguments before locking later in the script
+
+	# if the '--help' option was given, print the help msg and exit
+	if [ -n "${flag_help:+x}" ]; then
+		print_usage_and_exit
+	fi
+
+	# if an invalid option was given, print the error, print the help msg, and exit
+	if [ -n "${flag_misc:+x}" ]; then
+		print_error_and_exit "An invalid option was given!" '-h'
+	fi
 
 	[ $? -eq 0 ] && flag_parse_args="y" || print_error_and_exit "parse_args() failed!"
 }
@@ -136,11 +149,11 @@ renames it, uploads it to beer,
 		and sends a completion email. Without any arguments given, the '--default' flag is assumed.
 		
 		Allowed options:
-		  -d|--default       Uploads and renames the regular DP (1080_1.mp4). This is the default behaviour.
-		                     Cannot be used with the '-1|--one' option
-		  -s|--social	     Renames the social DP on ${remote_host}, if it exists. Quit if it is not found.
-		  -1|--one           There is only one DP (with a different default name). Cannot be used with '-d|--default'
-		  -h|--help          Prints this message and exits
+		  -d|--default       Uploads and renames the regular DP. This is the default behaviour.
+		                     Cannot be used with the '-a|--alt' option
+		  -s|--social        Renames the social DP on ${remote_host}, if it exists. Quit if it is not found.
+		  -a|--alt           There is only one DP (with the default name 1080_1.mp4). Cannot be used with '-d|--default'
+		  -h|--help          Prints this message and exits.
 		\0
 	USAGE_HEREDOC
 
@@ -184,31 +197,23 @@ start_ssh_master()
 # Function that does the actual work
 copy_and_upload_dp()
 {
-	# if the '--help' option was given, print the help msg and exit
-	if [ -n "${flag_help:+x}" ]; then
-		print_usage_and_exit
-
-	# if an invalid option was given, print the error, print the help msg, and exit
-	elif [ -n "${flag_misc:+x}" ]; then
-		print_error_and_exit "An invalid option was given!" '-h'
-	
 	# make sure that start_ssh_master() is ran before this function
-	elif [ -z "${flag_start_ssh_master:+x}" ]; then
+	if [ -z "${flag_start_ssh_master:+x}" ]; then
 		print_error_and_exit "Run start_ssh_master() first!"
 
 	# if the '--default' option is given...
 	elif [ -n "${flag_default:+x}" ]; then
 
-		# and the '--one' option was given, print the error, help msg, and exit
-		if [ -n "${flag_one:+x}" ]; then
-			print_error_and_exit "The '--default' option must not be provided with the --one option!"
+		# and the '--alt' option was given, print the error, help msg, and exit
+		if [ -n "${flag_alt:+x}" ]; then
+			print_error_and_exit "The '--default' option must not be provided with the --alt option!"
 
 		# if the social flag is set, 
 		elif [ -n "${flag_social:+x}" ]; then
 			social
 			default
 
-		# no '--one' or '--social' flags, just call the default function
+		# no '--alt' or '--social' flags, just call the default function
 		else
 			default
 		fi
@@ -221,20 +226,20 @@ copy_and_upload_dp()
 
 		if [ -n "${flag_default:+x}" ]; then
 			default
-		elif [ -n "${flag_one:+x}" ]; then
-			one
+		elif [ -n "${flag_alt:+x}" ]; then
+			alt
 		fi
 
-	# if the '--one' option was given
-	elif [ -n "${flag_one:+x}" ]; then
+	# if the '--alt' option was given
+	elif [ -n "${flag_alt:+x}" ]; then
 
 		if [ -n "${flag_default:+x}" ]; then
-			print_error_and_exit "The '--one' option must not be provided with the --default option!"
+			print_error_and_exit "The '--alt' option must not be provided with the --default option!"
 		elif [ -n "${flag_social:+x}" ]; then
 			social
-			one
+			alt
 		else
-			one
+			alt
 		fi
 
 	# if no arguments are provided, do the default action
@@ -250,6 +255,24 @@ default()
 	if [ -f "${local_dp}" ]; then
 		print_error_and_exit "${local_dp} already exists; script was already ran today!"
 	fi
+
+	ssh -T -o ControlPath=${ssh_control_socket} "${remote_host}" /bin/sh <<- DEFAULT_HEREDOC
+
+		cd -P ${remote_dp_dir}
+		find_output="\$(find . ! -name . -prune)"
+		if [ \$(echo "\$find_output" | grep -cE $default_regex) -eq 1 ]; then
+			mv "\$(echo "\$find_output" | grep -E $default_regex)" "$alt_default_dp"
+		else
+			exit $ecode_remote_dp_fail
+		fi
+
+	DEFAULT_HEREDOC
+
+	ssh_ecode=$?
+
+	# the heredoc returns this particular exit code if the number of regex matches is not 1
+	[ $ssh_ecode -eq $ecode_remote_dp_fail ] && print_error_and_exit "Either the default promo wasn't found, or there are too many files that match the regex on ${remote_host}!"
+	[ $ssh_ecode -ne 0 ] && print_error_and_exit "ssh in default() failed!"
 
 	# copy file from work station
 	scp -o ControlPath=${ssh_control_socket} "${remote_host}:${remote_dp}" "${local_dp}" &>/dev/null
@@ -284,39 +307,21 @@ social()
 	[ $ssh_ecode -ne 0 ] && print_error_and_exit "ssh in social() failed!"
 }
 
-# copy the "one" DP from remote, rename, upload to beer
-one()
+# copy the "alt" DP from remote, rename, upload to beer
+alt()
 {
 	# idempotently make sure file doesn't exist on local first, to prevent a second run from transferring again
 	if [ -f "${local_dp}" ]; then
 		print_error_and_exit "${local_dp} already exists; script was already ran today!"
 	fi
 
-	ssh -T -o ControlPath=${ssh_control_socket} "${remote_host}" /bin/sh <<- ONE_HEREDOC
-
-		cd -P ${remote_dp_dir}
-		find_output="\$(find . ! -name . -prune)"
-		if [ \$(echo "\$find_output" | grep -cE $one_regex) -eq 1 ]; then
-			mv "\$(echo "\$find_output" | grep -E $one_regex)" "$remote_default_dp"
-		else	
-			exit $ecode_remote_dp_fail
-		fi
-
-	ONE_HEREDOC
-
-	ssh_ecode=$?
-
-	# the heredoc returns this particular exit code if the number of regex matches is not 1
-	[ $ssh_ecode -eq $ecode_remote_dp_fail ] && print_error_and_exit "Either the 'one' promo wasn't found, or there are too many files that match the regex on ${remote_host}!"
-	[ $ssh_ecode -ne 0 ] && print_error_and_exit "ssh in one() failed!"
-
 	# copy file from work station
 	scp -o ControlPath=${ssh_control_socket} "${remote_host}:${remote_dp}" "${local_dp}" &>/dev/null
-	[ $? -eq 0 ] || print_error_and_exit "scp of promo failed!"
+	[ $? -eq 0 ] || print_error_and_exit "scp of alt promo failed; check to make sure it exists, and that the network is up!"
 
 	# upload file to beer
 	bash -c "${local_dir}upload2Beer.sh -d promo ${local_dp}"
-	[ $? -eq 0 ] || print_error_and_exit "upload of promo to beer failed!"
+	[ $? -eq 0 ] || print_error_and_exit "upload of alt promo to beer failed!"
 
 	send_email || print_error_and_exit "sending of email failed!"
 }
@@ -429,8 +434,6 @@ cleanup()
 	rm -rf "${lockdir}"
 }
 
-# set up traps and locking
 trap 'ecode=$?; printf "%s\\n" "Exit code: ${ecode}."' EXIT
-locking
 
-parse_args "$@" && start_ssh_master && copy_and_upload_dp
+parse_args "$@" && locking && start_ssh_master && copy_and_upload_dp
