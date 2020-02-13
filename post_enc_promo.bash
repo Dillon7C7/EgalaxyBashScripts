@@ -80,7 +80,7 @@ locking()
 		echo $$ > "${lockfile}"
 
 		#+ exit with a non-zero exit code if a signal was received
-		#  the trap on EXIT will do the cleanup, and the signal tra[ exit code will be passed to it
+		#  the trap on EXIT will do the cleanup, and the signal trap exit code will be passed to it
 		trap 'echo "Killed by a signal"; exit ${ecode_recvsig}' SIGHUP SIGINT SIGQUIT SIGTERM
 		echo "Got a lock!"
 
@@ -188,6 +188,10 @@ start_ssh_master()
 {
 	# make sure that parse_args() is ran before this function
 	[ -z "${flag_parse_args:+x}" ] && print_error_and_exit "arse_args() must be run before start_ssh_master()!"
+
+	# test host for ssh connectivity
+	ssh -o 'ConnectTimeout=5' -S "$ssh_control_socket" "${remote_host}" /bin/true &>/dev/null
+	[ $? -eq 0 ] || print_error_and_exit "ssh server doesn't appear to be running on ${remote_host}!"
 
 	# -f: background. -M: "master" mode for connection sharing. -N: Do no execute remote command.
 	ssh -f -M -N -o 'ControlMaster=yes' -S "$ssh_control_socket" "${remote_host}"
