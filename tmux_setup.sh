@@ -17,7 +17,7 @@ declare -a stdout_msg           # array of successful messages
 declare -a stderr_msg           # array of error or failed messages
 
 # list of LAN hosts from /etc/hosts
-host_list=("NakedBackup" "NakedExtra" "NakedFiles" "ITAdmin" "manilla")
+host_list=("NakedBackup" "NakedExtra" "NakedFiles" "ITAdmin" "manila")
 
 #################### START OF FUNCTION DECLARATIONS ##################
 
@@ -123,8 +123,16 @@ create_admin_session()
 			tmux new-window -t "${session_ssh}:${window}" -n "${host_list[${window}]}"
 		fi
 	
+		# connect to old manila with a compatible TERM value
+		if [[ "${host_list[${window}]}" == "manila" ]]; then
+			tmux send-keys -t "${session_ssh}:${window}" "TERM=screen ssh '${host_list[${window}]}'" 'ENTER'
+		# enable X11 forwarding for this server
+		elif [[ "${host_list[${window}]}" == "NakedBackup" ]]; then
+			tmux send-keys -t "${session_ssh}:${window}" "ssh -X '${host_list[${window}]}'" 'ENTER'
 		# send the ssh command to the tmux window
-		tmux send-keys -t "${session_ssh}:${window}" "ssh '${host_list[${window}]}'" 'ENTER'
+		else
+			tmux send-keys -t "${session_ssh}:${window}" "ssh '${host_list[${window}]}'" 'ENTER'
+		fi
 	done
 
 	# select the first window of the admin session
