@@ -28,6 +28,8 @@
 !/post_enc_promo.bash
 !/get_sa_vid_info.bash
 !/syno_backup.bash
+!/sa_header
+!/graphics_images.bash
 !/rsync_filters/
 !/rsync_filters/*
 !/rsync_filters/unused_filters/
