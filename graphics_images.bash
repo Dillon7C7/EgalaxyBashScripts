@@ -204,7 +204,7 @@ rename()
 
 		# if the segment ID read from input file is invalid, just prepend date to filename
 		else
-			new_pic_name_final="${pic_dir}/${new_pic_NUM}"
+			new_pic_name_final="${pic_dir}/${pic_name_NUM}"
 			pic_ver_num=-1
 		fi
 
