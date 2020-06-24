@@ -196,8 +196,8 @@ rename()
 
 			# make sure the file doesn't exist already (this will happen if the same segment appears twice in the show, for example)
 			until [ ! -e "$new_pic_name_final" ]; do
-				pic_name_ID_no_ext="${pic_name_ID_no_ext}${pic_ver_num}"
-				pic_name_ID_ext="${pic_name_ID_no_ext}.${pic_ext}"
+				pic_name_ID_no_ext_with_num="${pic_name_ID_no_ext}${pic_ver_num}"
+				pic_name_ID_ext="${pic_name_ID_no_ext_with_num}.${pic_ext}"
 				new_pic_name_final="${pic_dir}/${pic_name_ID_ext}"
 				pic_ver_num=$((pic_ver_num+1))
 			done
@@ -236,7 +236,7 @@ __cp_to_graphics()
 # move old $segment_file contents into a backup, if file is already empty
 clear_seg_file()
 {
-	[ -s "${segment_file}.old" ] || cp "$segment_file" "${segment_file}.old"
+	cp "$segment_file" "${segment_file}.old"
 	: > "$segment_file"
 }
 
