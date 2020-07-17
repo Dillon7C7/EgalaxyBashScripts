@@ -175,14 +175,13 @@ gen_and_print_email()
 {
 	from="FROM_ADDRESS"
 	to="TO_ADDRESS"
-	cc="CC_ADDRESS"
 	subject="Show live ${the_time}"
 	email_date="$(date --rfc-email)"
 
 	IFS= read -r -d '\0' message <<- MAIL_HEREDOC
 		From: ${from}
 		To: ${to}
-		Cc: ${cc}
+		BCC: ${from}
 		Subject: ${subject}
 		Date: ${email_date}
 		MIME-Version: 1.0

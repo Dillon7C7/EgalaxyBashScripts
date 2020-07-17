@@ -341,6 +341,7 @@ From: ${from}
 To: ${to}
 Subject: ${subject}
 Cc: ${cc}
+BCC: ${from}
 Date: ${date_header}
 MIME-Version: 1.0
 Content-Type: multipart/alternative; boundary="${mime_boundary}"
