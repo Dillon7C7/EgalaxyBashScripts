@@ -30,6 +30,7 @@
 !/syno_backup.bash
 !/sa_header
 !/graphics_images.bash
+!/email_dom.bash
 !/rsync_filters/
 !/rsync_filters/*
 !/rsync_filters/unused_filters/
