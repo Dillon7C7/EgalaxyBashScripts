@@ -5,6 +5,7 @@ WORK_DIR="/home/encoder/w" # working directory
 usage_flag=false # if true, print help
 verbose_flag=false # if true, set -x
 dom_flag=false # if true, delete domenic's files on remote
+skip_promo_flag=false # if true, skip deleting promo(s) on remote
 invalid_flag=false # if true, exit before rest of script
 print_flag=false # if true, don't print a newline on invalid flags
 
@@ -13,10 +14,11 @@ remote_cmd='cd REMOTE_DIRECTORY;./.cleanup'
 # print script usage
 print_usage()
 {
-    echo -e "Usage: $0 [-hvD]\n\
+    echo -e "Usage: $0 [-hvDP]\n\
 	-h	print this message\n\
 	-v	be verbose\n\
-	-D	delete files for Domenic"
+	-D	delete files for Domenic\n\
+	-P	don't delete promo(s) on beer"
 }
 
 # make sure we are in the working directory
@@ -25,12 +27,13 @@ if [ "$(pwd)" != "$WORK_DIR" ]; then
   exit 1
 fi
 
-while getopts ':hvD' opt
+while getopts ':hvDP' opt
 do
     case "${opt}" in
 	h) usage_flag=true ;;
 	v) verbose_flag=true ;;
 	D) dom_flag=true ;;
+	P) skip_promo_flag=true ;;
 	\?) if ! "$flag"; then
 			echo -en "\n"
 			print_flag=true
@@ -62,6 +65,10 @@ fi
 #+ a '-D' flag will be passed to remote .cleanup script to initiate it
 if "$dom_flag"; then
     remote_cmd="${remote_cmd} -D"
+fi
+
+if "$skip_promo_flag"; then
+    remote_cmd="${remote_cmd} -P"
 fi
 
 echo "Running Cleanup !!!!!!"
