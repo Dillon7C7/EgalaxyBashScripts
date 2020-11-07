@@ -212,7 +212,7 @@ start_ssh_master()
 	[ -z "${flag_parse_args:+x}" ] && print_error_and_exit "arse_args() must be run before start_ssh_master()!"
 
 	# test host for ssh connectivity
-	ssh -o 'ConnectTimeout=5' -S "$ssh_control_socket" "${remote_host}" /bin/true &>/dev/null
+	ssh -o 'ConnectTimeout=10' -S "$ssh_control_socket" "${remote_host}" /bin/true &>/dev/null
 	[ $? -eq 0 ] || print_error_and_exit "ssh server doesn't appear to be running on ${remote_host}!"
 
 	# -f: background. -M: "master" mode for connection sharing. -N: Do no execute remote command.
