@@ -443,8 +443,13 @@ social()
 	ssh_ecode=$?
 
 	# the heredoc returns this particular exit code if the number of regex matches is not 1
-	[ $ssh_ecode -eq $ecode_remote_dp_fail ] && print_error_and_exit "Either the 'social' promo wasn't found, or there are too many files that match the social regex on ${remote_host}!"
-	[ $ssh_ecode -ne 0 ] && print_error_and_exit "ssh in social() failed!"
+	if [ $ssh_ecode -eq $ecode_remote_dp_fail ]; then
+		print_error_and_exit "Either the 'social' promo wasn't found, or there are too many files that match the social regex on ${remote_host}!"
+	elif [ $ssh_ecode -ne 0 ]; then
+		print_error_and_exit "ssh in social() failed!"
+	else
+		return $ssh_ecode
+	fi
 }
 
 # like social, but account for Sunday DP as well on Friday
@@ -486,11 +491,17 @@ both_social()
 	ssh_ecode=$?
 
 	# the heredoc returns this particular exit code if the number of regex matches is not 1
-	[ $ssh_ecode -eq $ecode_remote_dp_fail ] && print_error_and_exit "Either the Friday and Sunday 'social' promos weren't found, or there are too many files that match the social regex on ${remote_host}!"
+	if [ $ssh_ecode -eq $ecode_remote_dp_fail ]; then
+		print_error_and_exit "Either the Friday and Sunday 'social' promos weren't found, or there are too many files that match the social regex on ${remote_host}!"
 
 	# the heredoc returns this particular exit code if the downloaded DP numbers are not in consecutive order
-	[ $ssh_ecode -eq $ecode_remote_dp_names ] && print_error_and_exit "The Friday and Sunday social promo numbers are not in a consecutive order on ${remote_host}!"
-	[ $ssh_ecode -ne 0 ] && print_error_and_exit "ssh in both_social() failed!"
+	elif [ $ssh_ecode -eq $ecode_remote_dp_names ]; then
+		print_error_and_exit "The Friday and Sunday social promo numbers are not in a consecutive order on ${remote_host}!"
+	elif [ $ssh_ecode -ne 0 ]; then
+		print_error_and_exit "ssh in both_social() failed!"
+	else
+		return $ssh_ecode
+	fi
 }
 
 # copy the "alt" DP from remote, rename, upload to beer
