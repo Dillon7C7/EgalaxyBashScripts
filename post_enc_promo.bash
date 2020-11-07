@@ -74,7 +74,8 @@ dirURL='DIRURL'
 link="${dirURL}${promo}"
 link_sun="${dirURL}${promo_sun}"
 
-to="TO_ADDRESS"
+#to="TO_ADDRESS"
+to="TEMP_TO_ADDRESS"
 from="FROM_ADDRESS"
 cc="CC_ADDRESS"
 subject="New Files From NN (${today_date_msg})"
