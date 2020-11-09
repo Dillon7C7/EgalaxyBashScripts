@@ -46,7 +46,7 @@ social_sun_promo="${sun_date}_DP_720.mp4"           # yyyy-mm-dd_DP_720.mp4
 alt_default_dp='1080_1.mp4'                         # default name for alt promo after download
 
 remote_host='REMOTE_HOST'                               # 'remote' (work station) hostname
-remote_dp_dir='REMOTE_DP_DIR'             # remote path to promo
+remote_dp_dir='NEW_REMOTE_DP_DIR'                          # remote path to promo
 remote_dp="${remote_dp_dir}${promo}"                # absolute path to default remote dp
 remote_sun_dp="${remote_dp_dir}${promo_sun}"        # absolute path to Sunday remote dp
 remote_alt_dp="${remote_dp_dir}${alt_default_dp}"   # absolute path to alt remote dp
@@ -325,7 +325,7 @@ default()
 		cd -P ${remote_dp_dir}
 		find_output="\$(find . ! -name . -prune)"
 		if [ \$(printf '%s\n' "\$find_output" | grep -cE $default_regex) -eq 1 ]; then
-			mv "\$(printf '%s\n' "\$find_output" | grep -E $default_regex)" "$remote_dp"
+			mv "\$(printf '%s\n' "\$find_output" | grep -E $default_regex)" "$promo"
 		else
 			exit $ecode_remote_dp_fail
 		fi
@@ -383,8 +383,8 @@ both()
 					next_show_num=\$(printf '%s\n' \$dp_match | cut -c16-19)
 					if [ \$next_show_num = \$((prev_show_num+1)) ]; then
 						prev_show_num=\$((prev_show_num+1))
-						mv "\$friday_DP" "$remote_dp"
-						mv "\$dp_match" "$remote_sun_dp"
+						mv "\$friday_DP" "$promo"
+						mv "\$dp_match" "$promo_sun"
 					else
 						exit $ecode_remote_dp_names
 					fi
