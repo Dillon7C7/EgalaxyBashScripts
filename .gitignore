@@ -32,6 +32,7 @@
 !/graphics_images.bash
 !/email_dom.bash
 !/server_backups.bash
+!/net_encoder_setup.bash
 !/rsync_filters/
 !/rsync_filters/*
 !/rsync_filters/unused_filters/
