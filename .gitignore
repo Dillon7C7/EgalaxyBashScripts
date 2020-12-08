@@ -33,6 +33,7 @@
 !/email_dom.bash
 !/server_backups.bash
 !/net_encoder_setup.bash
+!/rogers_bell_clear.sh
 !/rsync_filters/
 !/rsync_filters/*
 !/rsync_filters/unused_filters/
