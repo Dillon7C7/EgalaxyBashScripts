@@ -6,7 +6,7 @@ frame_opts=( -v error -select_streams v -show_entries stream=r_frame_rate -of cs
 codec_opts=( -v error -select_streams v -show_entries stream=codec_name \
 	-of default=noprint_wrappers=1:nokey=1 )
 
-if [ "$#" -ne "3" ] ; then
+if [ $# -ne 3 ] ; then
   echo "Usage: $0 YYYY-MM-DD Source_Folder  segment_number" >&2
   echo "Ex: $0 2014-03-09 today  2" >&2
   echo "Ex: $0 2014-11-28 weekend  1" >&2
@@ -22,11 +22,11 @@ segment_idx="$3"
 # Ex. 30000/1001 or 2997/100
 ffprobe_frame_rate="$(${ffprobe} "${frame_opts[@]}" "${source_dir}/${segment_idx}.mov")"
 
-# Divide the numbers in ${ffprobe_frame_rate}
-real_frame_rate=$((ffprobe_frame_rate))
+# Get the frame rate to 2 decimal places
+real_frame_rate=$(echo "scale=2; ${ffprobe_frame_rate}" | bc)
 
-# make sure the frame rate (rounded down) is 29
-if [ ${real_frame_rate} -ne 29 ]; then
+# make sure the frame rate is 29.97
+if [[ "${real_frame_rate}" != "29.97" ]]; then
 	echo "ERROR!!!! Segment does not have a floor frame rate of 29 !!" >&2
 	echo "Frame rate is ${real_frame_rate}" >&2
 	exit 1
@@ -43,7 +43,7 @@ fi
 
 ${pv} "${source_dir}/${segment_idx}.mov" > "female_show_${name_date}_hd_${segment_idx}.mov"
 
-if [ "$?" -eq "0" ]; then
+if [ $? -eq 0 ]; then
 	./sk_encode.sh female_show_${name_date}_hd_${segment_idx}.mov
 else
 	echo "$0 ERROR: cp from working directory failed" >&2
