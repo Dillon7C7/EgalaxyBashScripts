@@ -13,12 +13,13 @@ file_name="$(basename "$1")"
 show_num="${file_name:3:4}"
 
 # make sure show num is a num
-[[ "$show_num" =~ [[:digit:]]{4} ]] || { echo "Incorrect show num!"; exit 2; }
+[[ "$show_num" =~ [[:digit:]]{4} ]] || { echo "Show num is not valid!"; exit 2; }
 
 $pv "${source_dir}/${file_name}" > "${file_name}"
 
-ffmpeg -i ./"${file_name}" -vcodec copy -acodec copy -f mp4 ./"${file_name/%.mov/.mp4}"
-ffmpeg -i ./"${file_name}"  -vn -ac 2 -ar 44100 -ab 256k -f mp3 ./"${file_name/%.mov/.mp3}"
+ffmpeg -i ./"${file_name}" -vcodec copy -acodec copy -f mp4 ./"${file_name/%.mov/.mp4}" \
+-vn -ac 2 -ar 44100 -ab 256k -f mp3 ./"${file_name/%.mov/.mp3}"
 
 ./domenic_upload ./"${file_name/%.mov/.mp3}" && \
-./domenic_upload ./"${file_name/%.mov/.mp4}" && ./email_dom.bash "$show_num"
+./domenic_upload ./"${file_name/%.mov/.mp4}" && \
+./email_dom.bash "$show_num"
