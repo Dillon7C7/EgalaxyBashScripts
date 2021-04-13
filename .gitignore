@@ -25,6 +25,7 @@
 !/show_live.bash
 !/tmux_setup.sh
 !/ddns_cron.bash
+!/DELETED_cleanup.bash
 !/post_enc_promo.bash
 !/get_sa_vid_info.bash
 !/syno_backup.bash
