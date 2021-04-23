@@ -12,25 +12,32 @@
 declare -a segment_ids
 
 declare -A valid_segment_ids
+valid_segment_ids[ACT]="REDACTED"
+valid_segment_ids[ASS]="REDACTED"
 valid_segment_ids[AUD]="REDACTED"
 valid_segment_ids[BTL]="REDACTED"
 valid_segment_ids[BTS]="REDACTED"
 valid_segment_ids[BUT]="REDACTED"
 valid_segment_ids[CLS]="REDACTED"
 valid_segment_ids[COO]="REDACTED"
+valid_segment_ids[COC]="REDACTED"
 valid_segment_ids[DUN]="REDACTED"
 valid_segment_ids[ENT]="REDACTED"
 valid_segment_ids[FLX]="REDACTED"
 valid_segment_ids[FOL]="REDACTED"
+valid_segment_ids[FRA]="REDACTED"
 valid_segment_ids[GAS]="REDACTED"
 valid_segment_ids[XPO]="REDACTED"
 valid_segment_ids[BOX]="REDACTED"
 valid_segment_ids[LAL]="REDACTED"
+valid_segment_ids[LAU]="REDACTED"
+valid_segment_ids[LUC]="REDACTED"
 valid_segment_ids[MOV]="REDACTED"
 valid_segment_ids[FOO]="REDACTED"
 valid_segment_ids[NGP]="REDACTED"
 valid_segment_ids[POT]="REDACTED"
 valid_segment_ids[NIT]="REDACTED"
+valid_segment_ids[NRD]="REDACTED"
 valid_segment_ids[NNM]="REDACTED"
 valid_segment_ids[YOG]="REDACTED"
 valid_segment_ids[BUA]="REDACTED"
@@ -56,6 +63,7 @@ valid_segment_ids[VBL]="REDACTED"
 valid_segment_ids[VMA]="REDACTED"
 valid_segment_ids[WTH]="REDACTED"
 valid_segment_ids[WLS]="REDACTED"
+valid_segment_ids[WFA]="REDACTED"
 
 # clear ssh ControlMaster, and clear segment_file
 cleanup()
@@ -145,7 +153,7 @@ rename()
 		pic_num="${pic:(-5):1}"           # file number (name excluding file extension)
 		pic_base_prefix="${pic_base:0:1}" # f or s, for Friday or Sunday
 		array_num=$((pic_num-1))          # arrays start at 0
-		sun_array_num=$((pic_num+6))      # number for Sunday
+		sun_array_num=$((pic_num+5))      # number for Sunday
 
 		#  Save basename without ext (ex. 2020-05-16_VMA), so the variable in question
 		#+ can be used to easily append a number to when checking for duplicates.
