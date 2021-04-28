@@ -36,6 +36,7 @@
 !/net_encoder_setup.bash
 !/rogers_bell_clear.sh
 !/del_aws_vids.bash
+!/sa_segment_email.bash
 !/rsync_filters/
 !/rsync_filters/*
 !/rsync_filters/unused_filters/
