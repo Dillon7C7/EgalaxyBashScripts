@@ -186,7 +186,7 @@ upload_files()
 		fi
 	done
 
-	printf '\n%b\n' "${yellow}he following images were provided:${res_term}"
+	printf '\n%b\n' "${yellow}The following images were provided:${res_term}"
 	printf '%s\n' "$@"
 	printf '\n'
 
@@ -197,7 +197,7 @@ upload_files()
 	fi
 
 	if ((${#fail[@]})); then
-		printf '%s\n' "${red}The following images were not uploaded:${res_term}"
+		printf '%b\n' "${red}The following images were not uploaded:${res_term}"
 		printf '%s\n' "${fail[@]}"
 		printf '\n'
 	fi
