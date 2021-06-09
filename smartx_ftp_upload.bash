@@ -108,9 +108,11 @@ ovpn()
 {
 	if [[ "$1" != "start" ]] && [[ "$1" != "stop" ]]; then
 		die "Neither 'start' nor 'stop' was provided to ovpn()"
-	else
-		action="$1"
+	elif [[ "$1" == "start" ]]; then
+		trap 'ovpn stop' EXIT
 	fi
+
+	action="$1"
 
 	if sudo systemctl "$action" openvpn-client@smartx.service; then
 		printf '%s\n' "OpenVPN $action connection successful"
@@ -212,7 +214,6 @@ script="${0##*/}"
 # 'win' is for successfully uploaded images, 'fail' is for failed uploads
 declare -a win fail
 
-trap 'ovpn stop' EXIT
 
 parse_args "$@" && \
 check_user && \
