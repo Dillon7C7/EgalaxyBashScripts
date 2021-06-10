@@ -1,98 +1,170 @@
 #!/bin/bash
 
-print_usage_and_quit() {
-	echo "Usage: $0 [-h|--help]"
-	echo "    or $0 FILE"
-	echo "    or $0 [-d|--remote-dir] REMOTE_DIRECTORY FILE"
+red="$(tput setaf 1)"
+green="$(tput setaf 2)"
+yellow="$(tput setaf 3)"
+res_term="$(tput sgr0)"
+
+
+print_usage()
+{
+	printf '%s\n' "usage: ${script} [-h] [-d DIR] FILE [FILE ...]"
+} >&2
+
+print_help_and_exit()
+{
+	print_usage
+
+	read -r -d '\0' help_msg <<- EOF_HELP
+	Upload files to t.nakednews.com
+
+	positional arguments:
+	  FILE                        the file(s) to upload
+
+	optional arguments:
+	  -h, --help                  show this message and exit
+	  -d DIR, --remote-dir DIR    append DIR to the base sk-encoder directory
+	\0
+	EOF_HELP
+
+	printf '\n%s\n' "$help_msg"
 	exit 1
 } >&2
 
-print_help_and_quit() {
-	echo "$0 [-h|--help] displays this help message and exits."
-	echo "$0 FILE uploads a file to beer."
-	echo "$0 [-d|--remote-dir] DIR FILE uploads a file to beer in remote directory DIR."
-	exit 0
+die()
+{
+	print_usage
+	err_msg="$1"
+	printf '%s\n' "${script}: error: ${err_msg}"
+	exit 1
+} >&2
+
+warn()
+{
+	warn_msg="$1"
+	printf '%b\n' "${script}: ${yellow}WARNING:${res_term} ${warn_msg}"
+} >&2
+
+# pass in "$@"
+parse_args()
+{
+	while [[ $# -gt 0 ]]; do
+		[[ "$1" == --*=* ]] && set -- "${1%%=*}" "${1#*=}" "${@:2}"
+		case "$1" in
+			-h|--help) print_help_and_quit ;;
+			-d|--remote-dir)
+				if [[ -z "$2" ]]; then
+					die "'-d|--remote-dir' requires an argument"
+				else
+					remote_dir="$2"
+					shift
+				fi ;;
+			-*) die "unrecognized argument: '$1'" ;;
+			*)
+				if [[ ! -f "$1" ]]; then
+					die "'$1' does not exist on local system, and/or is not a file"
+				else
+					files+=("$1")
+				fi ;;
+		esac
+		shift
+	done
+
+	((${#files[@]})) || die "at least one file is required"
+
+	return 0
 }
 
-check_remote_dir() {
+# set up ssh connection sharing
+setup_ssh()
+{
+	remote="REMOTE_USER@REMOTE_HOST"
+	remote_uri="REMOTE_URI"
 
-	# ** we have to store positional paramters in a variable in order for functions to use them
-	# if there is a directoy, check to make sure it isn't the help flag, then initialize remote_dir
-	if [[ -n "$remote_dir" ]]; then
+	# socket for ControlMaster
+	ssh_ctl="/tmp/${script}-$$-ssh.socket"
 
-		# we always want to print the help message when the help flag is given
-		if [[ "$remote_dir" == "-h" ]] || [[ "$remote_dir" == "--help" ]]; then
-			print_help_and_quit
+	# create initial TCP connection
+	if ! ssh -fN -o 'ControlMaster=yes' -o 'ControlPersist=yes' -o 'ConnectTimeout=20' -S "$ssh_ctl" "$remote"; then
+		die "initial ssh connection failed"
+	else
+		# close ssh connection on script exit
+		trap 'ssh -O exit -S "$ssh_ctl" "$remote" &>/dev/null' EXIT
+	fi
 
-		# make sure there are no forward slashes in our remote dir
-		elif [[ ! "$remote_dir" =~ ^[^/]+$ ]]; then
-			# we have slashes in our remote dir!
-			remote_regex_fail=1
+	return 0
+}
+
+# make sure remote_dir exists on the remote host
+check_remote_dir()
+{
+	# if --remote-dir was given, create the dir on remote host if it doesn't already exist
+	if [[ -n "${remote_dir:+x}" ]]; then
+		if ! ssh -T -S "$ssh_ctl" "$remote" "cd -P "$remote_uri"; [ -d "$remote_dir" ] || mkdir -p "$remote_dir""; then
+			die "ssh failed when trying to check remote dir $remote_dir"
+		# ssh succeeded
+		else
+			# append remote dir to remote URI
+			remote_uri="${remote_uri}/${remote_dir}"
 		fi
+	fi
 
-		# this function was called and we have a remote dir
-		remote_dir_flag=1
+	return 0
+}
 
-	# no remote dir given, exit
-	else # [[ -z "$remote_dir" ]]
-		echo "ERROR. No REMOTE_DIR given." >&2
-		print_usage_and_quit
+# pass in a file, should only be called from upload_files()
+_upload_file()
+{
+	local file="$1"
+
+	if ! scp -o ControlPath="$ssh_ctl" "$file" "${remote}:${remote_uri}/" 2>/dev/null; then
+		warn "upload of '$file' failed"
+		return 1
+	else
+		return 0
 	fi
 }
 
-file_arg=()
-remote_dir_flag=0
-remote_regex_fail=0
+# batch upload
+upload_files()
+{
 
-# parse arguments
-while :; do
+	for file in "${files[@]}"; do
+		if _upload_file "$file"; then
+			success+=("$file")
+		else
+			fail+=("$file")
+		fi
+	done
 
-	# shift until we are out of arguments, then break
-	[[ "$#" -eq 0 ]] && break
+	printf '\n%b\n' "${yellow}The following files were provided:${res_term}"
+	printf '%s\n' "${files[@]}"
+	printf '\n'
 
-	case "$1" in
-		-h|--help) print_help_and_quit ;;
-		-d|--remote-dir) remote_dir="$2"; check_remote_dir; shift ;; # addl. shift for remote_dir positional param
-		*) file_arg+=("$1") ;; # store file argment in an array
-	esac
-	shift
-done
+	if ((${#success[@]})); then
+		printf '%b\n' "${green}The following files were successfully uploaded:${res_term}"
+		printf '%s\n' "${success[@]}"
+		printf '\n'
+	fi
 
-# reason for doing this after the while loop is to allow any usage of the help flag to trigger print_help_and_quit()
-if [[ "$remote_regex_fail" -eq 1 ]]; then
-	echo "ERROR. Do not include forward slashes / in REMOTE_DIR" >&2
-	print_usage_and_quit
-fi
+	if ((${#fail[@]})); then
+		printf '%b\n' "${red}The following files were not uploaded successfully:${res_term}"
+		printf '%s\n' "${fail[@]}"
+		printf '\n'
+	fi
 
-# ${file_arg[]} should only contain 1 element, which is a regular file that exists
-if [[ "${#file_arg[@]}" -ne 1 ]]; then 
-	echo "ERROR. Provide one file only!" >&2
-	print_usage_and_quit
+	return 0
+}
 
-elif [[ ! -f "${file_arg[0]}" ]]; then
-	echo "ERROR. ${file_arg[0]} is not a file!" >&2
-	print_usage_and_quit
-fi
+# script basename
+script="${0##*/}"
 
-file="${file_arg[0]}"
-remote_file="$(/usr/bin/basename "${file}")"
-remote_user="USER"
+declare -a files
 
-# didn't have -d flag
-if [[ "$remote_dir_flag" -eq 0 ]]; then
-	remote_url="REMOTE_HOST:REMOTE_DIRECTORY"
-else # did have -d flag
-	remote_url="REMOTE_HOST:REMOTE_DIRECTORY"/"${remote_dir}"
-fi
+# 'success' is for successfully uploaded files, 'fail' is for failed uploads
+declare -a success fail
 
-# the actual uploading
-scp "$file" "${remote_user}"@"${remote_url}"/"'${remote_file}'"
-
-if [[ "$?" -eq 0 ]]; then
-	echo "File uploaded successfully."
-	exit 0
-else
-	echo "File upload failed with scp exit code $?" >&2
-	[[ "$remote_dir_flag" -eq 1 ]] && echo "Make sure destination dir exists" >&2
-	exit 1
-fi
+parse_args "$@" && \
+setup_ssh && \
+check_remote_dir && \
+upload_files
