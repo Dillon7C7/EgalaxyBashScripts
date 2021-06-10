@@ -45,7 +45,7 @@ die()
 warn()
 {
 	warn_msg="$1"
-	printf '%s\n' "${script}: WARNING: ${warn_msg}"
+	printf '%b\n' "${yellow}${script}: WARNING: ${warn_msg}${res_term}"
 } >&2
 
 # assume this script is called via 'sudo' as the 'encoder' user
@@ -81,24 +81,32 @@ get_creds()
 	return 0
 }
 
+# pass in an image
+# this makes sure it exists, and is a JPEG
+_check_img()
+{
+	local img="$1"
+	[[ -f "$img" ]] || die "Given argument '${img:-NULL}' is not a file"
+
+	file_format="$(identify -format '%m\n' "$img" 2>/dev/null)"
+	[[ "$file_format" == "JPEG" ]] || die "Given file '$img' is not a JPEG"
+
+	return 0
+}
+
 # pass in "$@"
 parse_args()
 {
-	declare -a params
-
 	while [[ $# -gt 0 ]]; do
 		case "$1" in
 			-h|--help) print_help_and_exit ;;
 			-*) die "unrecognized argument: '$1'" ;;
-			*) params+=("$1") ;;
+			*) _check_img "$1"; images+=("$1") ;;
 		esac
 		shift 1
 	done
 
-	set -- "${params[@]}"
-	unset params
-
-	[[ $# -gt 0 ]] || die "at least one image is required"
+	((${#images[@]})) || die "at least one image is required"
 
 	return 0
 }
@@ -139,15 +147,12 @@ test_ftp()
 }
 
 # pass in an image to upload
-check_and_upload_file()
+_upload_file()
 {
 	img="$1"
-	[[ -f "$img" ]] || die "Given argument '${img:-NULL}' is not a file"
-
-	file_format="$(identify -format '%m\n' "$img" 2>/dev/null)"
-	[[ "$file_format" == "JPEG" ]] || die "Given file '$img' is not a JPEG"
 
 	# 'ftp:ssl-protect-data' enables data channel encryption, which is required before executing any commands that will transfer data
+
 	# make sure image doesn't already exist on the FTP server
 	lftp -u "${username},${password}" "$host" 2>/dev/null <<- CHECK_EOF
 		set ssl:verify-certificate no
@@ -177,11 +182,11 @@ check_and_upload_file()
 	return 0
 }
 
-# batch upload, pass in "$@"
+# batch upload
 upload_files()
 {
-	for img in "$@"; do
-		if check_and_upload_file "$img"; then
+	for img in "${images[@]}"; do
+		if _upload_file "$img"; then
 			win+=("$img")
 		else
 			fail+=("$img")
@@ -189,7 +194,7 @@ upload_files()
 	done
 
 	printf '\n%b\n' "${yellow}The following images were provided:${res_term}"
-	printf '%s\n' "$@"
+	printf '%s\n' "${images[@]}"
 	printf '\n'
 
 	if ((${#win[@]})); then
@@ -211,6 +216,8 @@ upload_files()
 # script basename
 script="${0##*/}"
 
+declare -a images
+
 # 'win' is for successfully uploaded images, 'fail' is for failed uploads
 declare -a win fail
 
@@ -221,4 +228,4 @@ check_deps && \
 get_creds && \
 ovpn 'start' && \
 test_ftp && \
-upload_files "$@"
+upload_files
