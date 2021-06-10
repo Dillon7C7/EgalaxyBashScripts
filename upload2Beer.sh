@@ -51,7 +51,7 @@ parse_args()
 	while [[ $# -gt 0 ]]; do
 		[[ "$1" == --*=* ]] && set -- "${1%%=*}" "${1#*=}" "${@:2}"
 		case "$1" in
-			-h|--help) print_help_and_quit ;;
+			-h|--help) print_help_and_exit ;;
 			-d|--remote-dir)
 				if [[ -z "$2" ]]; then
 					die "'-d|--remote-dir' requires an argument"
