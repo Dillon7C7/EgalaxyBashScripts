@@ -45,7 +45,7 @@ die()
 warn()
 {
 	warn_msg="$1"
-	printf '%b\n' "${yellow}${script}: WARNING: ${warn_msg}${res_term}"
+	printf '%b\n' "${script}: ${yellow}WARNING:${res_term} ${warn_msg}"
 } >&2
 
 # assume this script is called via 'sudo' as the 'encoder' user
@@ -117,7 +117,7 @@ ovpn()
 	if [[ "$1" != "start" ]] && [[ "$1" != "stop" ]]; then
 		die "Neither 'start' nor 'stop' was provided to ovpn()"
 	elif [[ "$1" == "start" ]]; then
-		trap 'ovpn stop' EXIT
+		trap 'ovpn stop; rm -rf "$img_check_dir"' EXIT
 	fi
 
 	action="$1"
@@ -146,12 +146,14 @@ test_ftp()
 	return 0
 }
 
-# pass in an image to upload
-_upload_file()
+# make sure image doesn't already exist on remote FTP
+# we check by trying to download the image
+# pass in the image
+_check_remote_img()
 {
-	img="$1"
+	local img="$1"
 
-	# 'ftp:ssl-protect-data' enables data channel encryption, which is required before executing any commands that will transfer data
+	pushd "$img_check_dir" &>/dev/null
 
 	# make sure image doesn't already exist on the FTP server
 	lftp -u "${username},${password}" "$host" 2>/dev/null <<- CHECK_EOF
@@ -161,20 +163,39 @@ _upload_file()
 		get "${img##*/}"
 	CHECK_EOF
 
-	if [[ $? -eq 0 ]]; then 
+	ecode=$?
+
+	popd &>/dev/null
+
+	if [[ $ecode -eq 0 ]]; then
 		warn "'$img' already exists on the FTP server"
 		return 1
 	fi
 
+	return 0
+}
+
+# pass in an image to upload
+_upload_file()
+{
+	# 'ftp:ssl-protect-data' enables data channel encryption, which is required before executing any commands that will transfer data
+
+	local img="$1"
+
+	# if the image already exists on the remote FTP site, immediately return
+	if ! _check_remote_img "$img"; then
+		return 1
+	fi
+
 	# upload the image to the server
- 	lftp -u "${username},${password}" "$host" <<- UPLOAD_EOF
- 		set ssl:verify-certificate no
- 		set ftp:ssl-protect-data true
- 		cd nakednews/email/images/fan-zones-emails/
- 		put "$img"
+	lftp -u "${username},${password}" "$host" <<- UPLOAD_EOF
+		set ssl:verify-certificate no
+		set ftp:ssl-protect-data true
+		cd nakednews/email/images/fan-zones-emails/
+		put "$img"
 	UPLOAD_EOF
 
-	if [[ $? -ne 0 ]]; then 
+	if [[ $? -ne 0 ]]; then
 		warn "Upload of '$img' failed"
 		return 1
 	fi
@@ -185,6 +206,8 @@ _upload_file()
 # batch upload
 upload_files()
 {
+	mkdir "$img_check_dir"
+
 	for img in "${images[@]}"; do
 		if _upload_file "$img"; then
 			win+=("$img")
@@ -220,6 +243,9 @@ declare -a images
 
 # 'win' is for successfully uploaded images, 'fail' is for failed uploads
 declare -a win fail
+
+# cd into this directory before attempting to get the remote image
+img_check_dir="/tmp/${script}-img_check"
 
 
 parse_args "$@" && \
