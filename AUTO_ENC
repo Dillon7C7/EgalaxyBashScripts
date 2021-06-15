@@ -52,7 +52,7 @@ fi
 
 # check source directory
 # must be one of today, friday, wednesday, weekend, holiday
-dir_regex="^(today|friday|weekend|wednesday|holiday(/[0-9]{4}-[0-9]{2}-[0-9]{2})?)$"
+dir_regex="^(today|friday|weekend|wednesday|holiday(/(COVCONT/COVCONT)?[0-9]{4}-[0-9]{2}-[0-9]{2})?)$"
 
 if [[ ! "$source_dir" =~ $dir_regex ]]; then
 	echo -e "$0 ERROR: source directory must be one of:\n\
