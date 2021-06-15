@@ -11,6 +11,22 @@ hb_opts=( -e x264 -E faac --ab 320 --decomb -q 13 --x264-preset faster
 	--crop 0:0:0:0 --strict-anamorphic -o "$output")
 
 
+###### THE FOLLOWING FFMPEG COMMAND CAN BE USED TO REPLACE THE ABOVE HANDBRAKE ARGS ######
+#
+# ------------------------------------------------
+#
+#ffmpeg -guess_layout_max 0 -i "$input" \
+#	-map 0:v:0 -map 0:a:0 \
+#	-c:a aac -b:a 320k -ac 2 \
+#	-crf 13 -c:v libx264 -preset faster -tune film -profile:v high -level 41 \
+#	-vf "yadif,format=yuv420p,scale=out_color_matrix=bt709" -color_primaries bt709 -color_trc bt709 -colorspace bt709 \
+#	-write_tmcd 0 "$output"
+#
+# ------------------------------------------------
+#
+###### I suggest running the above using a dockerized ffmpeg, in order to prevent upgrades breaking the command ######
+
+
 die()
 {
 	err_msg="$1"
