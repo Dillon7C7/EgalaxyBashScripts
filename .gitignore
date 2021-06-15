@@ -38,6 +38,7 @@
 !/del_aws_vids.bash
 !/sa_segment_email.bash
 !/smartx_ftp_upload.bash
+!/check_mov.bash
 !/rsync_filters/
 !/rsync_filters/*
 !/rsync_filters/unused_filters/
