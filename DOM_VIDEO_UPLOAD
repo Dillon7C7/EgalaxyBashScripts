@@ -22,4 +22,4 @@ ffmpeg -i ./"${file_name}" -vcodec copy -acodec copy -f mp4 ./"${file_name/%.mov
 
 ./domenic_upload ./"${file_name/%.mov/.mp3}" && \
 ./domenic_upload ./"${file_name/%.mov/.mp4}" && \
-./email_dom.bash "$show_num"
+#./email_dom.bash "$show_num"
