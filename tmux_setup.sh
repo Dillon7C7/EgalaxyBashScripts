@@ -17,7 +17,7 @@ declare -a stdout_msg           # array of successful messages
 declare -a stderr_msg           # array of error or failed messages
 
 # list of LAN hosts from /etc/hosts
-host_list=("NakedBackup" "NakedExtra" "NakedFiles" "ITAdmin" "manila")
+host_list=("NakedBackup" "NakedExtra" "NakedFiles" "router.2700dufferinstudio.com")
 
 #################### START OF FUNCTION DECLARATIONS ##################
 
@@ -208,3 +208,4 @@ if [[ -z "${TMUX:+x}" ]]; then
 else
 	tmux switch-client -t "${session_work}"
 fi
+exit 0
