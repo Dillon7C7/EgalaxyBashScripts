@@ -22,7 +22,7 @@ yes_sent="/home/encoder/w/show_live_done" # if this file exists, then the email 
 # print script usage and exit
 print_usage_and_exit()
 {
-	IFS= read -r -d '\0' help_msg <<- USAGE_HEREDOC
+	IFS= read -r -d $'\0' help_msg <<- USAGE_HEREDOC || true
 	$(printf ${color_yellow})$(basename $0): $(printf ${color_reset})Sends the "Show live" email with a the subject containing the time (of one minute ago by default).
 	
 		Allowed options:
@@ -31,7 +31,6 @@ print_usage_and_exit()
 		                     Cannot be used with the '-t|--time' option.
 		  -t|--time          Specify a time (HH:MM AM/PM). Cannot be used with the '-d|--default' option.
 		  -h|--help          Prints this message and exists.
-	\0
 	USAGE_HEREDOC
 
 	printf "%s\\n" "$help_msg" >&2
@@ -178,7 +177,7 @@ gen_and_print_email()
 	subject="Show live ${the_time}"
 	email_date="$(date --rfc-email)"
 
-	IFS= read -r -d '\0' message <<- MAIL_HEREDOC
+	IFS= read -r -d $'\0' message <<- MAIL_HEREDOC || true
 		From: ${from}
 		To: ${to}
 		BCC: ${from}
@@ -189,7 +188,6 @@ gen_and_print_email()
 		Content-Transfer-Encoding: 7bit
 		Content-Language: en-US
 	
-		\0
 		MAIL_HEREDOC
 
 	printf "%s\\n" "$message"

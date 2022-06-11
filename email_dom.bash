@@ -8,7 +8,7 @@ to="To: TO_ADDRESS"
 cc="Cc: CC_ADDRESSES"
 date="Date: $(date -R)"
 
-IFS= read -r -d '\0' message <<- EMAIL_DOC
+IFS= read -r -d $'\0' message <<- EMAIL_DOC || true
 	${from}
 	${to}
 	${cc}
@@ -29,7 +29,6 @@ IFS= read -r -d '\0' message <<- EMAIL_DOC
 	Thank you,
 	
 	Dillon
-	\0
 EMAIL_DOC
 
 printf "%s\\n" "$message" | msmtp --read-recipients

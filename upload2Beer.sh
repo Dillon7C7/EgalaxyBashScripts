@@ -15,7 +15,7 @@ print_help_and_exit()
 {
 	print_usage
 
-	read -r -d '\0' help_msg <<- EOF_HELP
+	read -r -d $'\0' help_msg <<- EOF_HELP || true
 	Upload files to t.nakednews.com
 
 	positional arguments:
@@ -24,7 +24,6 @@ print_help_and_exit()
 	optional arguments:
 	  -h, --help                  show this message and exit
 	  -d DIR, --remote-dir DIR    append DIR to the base sk-encoder directory
-	\0
 	EOF_HELP
 
 	printf '\n%s\n' "$help_msg"

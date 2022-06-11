@@ -15,7 +15,7 @@ print_help_and_exit()
 {
 	print_usage
 
-	read -r -d '\0' help_msg <<- EOF_HELP
+	read -r -d $'\0' help_msg <<- EOF_HELP || true
 	Check a given video file for the following:
 
 	  Video stream:
@@ -31,7 +31,6 @@ print_help_and_exit()
 
 	optional arguments:
 	  -h, --help            show this message and exit
-	\0
 	EOF_HELP
 
 	printf '\n%s\n' "$help_msg"

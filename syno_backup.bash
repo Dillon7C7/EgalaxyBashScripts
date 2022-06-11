@@ -198,13 +198,12 @@ generate_rsync_email()
 				*) subject="${subject_prefix} WARN[${ecode}]: All share backups completed, but got an unexpected exit code." ;;
 			esac
 				
-			IFS= read -r -d '\0' body <<- EMAIL_BODY_EOF
+			IFS= read -r -d $'\0' body <<- EMAIL_BODY_EOF || true
 				Backup start time: ${backup_start_time}
 
 				All transfers completed successfully. List below:
 
 				$(printf "%s\\n" "${rsync_success[@]}")
-				\0
 			EMAIL_BODY_EOF
 
 		# no transfers completed! check network/services!
@@ -212,13 +211,12 @@ generate_rsync_email()
 
 			subject="${subject_prefix} FAILURE[${ecode}]: All share backups failed!"
 
-			IFS= read -r -d '\0' body <<- EMAIL_BODY_EOF
+			IFS= read -r -d $'\0' body <<- EMAIL_BODY_EOF || true
 				Backup start time: ${backup_start_time}
 
 				All transfers FAILED! Here is list of them, with rsync exit codes:
 
 				$(printf "%s\\n" "${rsync_fail[@]}")
-				\0
 			EMAIL_BODY_EOF
 
 		# only some transfers completed successfully
@@ -226,7 +224,7 @@ generate_rsync_email()
 
 			subject="${subject_prefix} FAILURE[${ecode}]: Only some backups completed successfully!"
 
-			IFS= read -r -d '\0' body <<- EMAIL_BODY_EOF
+			IFS= read -r -d $'\0' body <<- EMAIL_BODY_EOF || true
 				Backup start time: ${backup_start_time}
 
 				Some transfers completed. Here is a list of successful transfers:
@@ -236,7 +234,6 @@ generate_rsync_email()
 				Here is a list of failed transfers with rsync exit codes:
 
 				$(printf "%s\\n" "${rsync_fail[@]}")
-				\0
 			EMAIL_BODY_EOF
 		fi
 
@@ -247,7 +244,7 @@ generate_rsync_email()
 		# change the email body based on if success/fail arrays are empty
 		if [ $len_success -eq 0 ]; then
 
-			IFS= read -r -d '\0' body <<- EMAIL_BODY_EOF
+			IFS= read -r -d $'\0' body <<- EMAIL_BODY_EOF || true
 				Backup start time: ${backup_start_time}
 
 				It appears that not all shares were accounted for.
@@ -257,12 +254,11 @@ generate_rsync_email()
 				Here is a list of failed transfers with rsync exit codes:
 
 				$(printf "%s\\n" "${rsync_fail[@]}")
-				\0
 			EMAIL_BODY_EOF
 
 		elif [ $len_fail -eq 0 ]; then
 
-			IFS= read -r -d '\0' body <<- EMAIL_BODY_EOF
+			IFS= read -r -d $'\0' body <<- EMAIL_BODY_EOF || true
 				Backup start time: ${backup_start_time}
 
 				It appears that not all shares were accounted for.
@@ -272,11 +268,10 @@ generate_rsync_email()
 				$(printf "%s\\n" "${rsync_success[@]}")
 
 				Surprisinly, no transfers failed.
-				\0
 			EMAIL_BODY_EOF
 
 		else
-			IFS= read -r -d '\0' body <<- EMAIL_BODY_EOF
+			IFS= read -r -d $'\0' body <<- EMAIL_BODY_EOF || true
 				Backup start time: ${backup_start_time}
 
 				It appears that not all shares were accounted for.
@@ -288,7 +283,6 @@ generate_rsync_email()
 				List of failed transfers with rsync exit codes:
 
 				$(printf "%s\\n" "${rsync_fail[@]}")
-				\0
 			EMAIL_BODY_EOF
 		fi
 	fi
@@ -302,7 +296,7 @@ generate_final_email()
 
 	# if ${body} is set and not null, include it in final email
 	if [[ -n "${body:+x}" ]]; then
-		IFS= read -r -d '\0' message <<- FINAL_MAIL_HEREDOC
+		IFS= read -r -d $'\0' message <<- FINAL_MAIL_HEREDOC || true
 			From: FROM_EMAIL
 			To: TO_EMAIL
 			Subject: ${subject}
@@ -313,12 +307,11 @@ generate_final_email()
 			Content-Language: en-US
 
 			${body}
-			\0
 		FINAL_MAIL_HEREDOC
 
 	# otherwise, no body
 	else
-		IFS= read -r -d '\0' message <<- FINAL_MAIL_HEREDOC
+		IFS= read -r -d $'\0' message <<- FINAL_MAIL_HEREDOC || true
 			From: FROM_EMAIL
 			To: TO_EMAIL
 			Subject: ${subject}
@@ -327,7 +320,6 @@ generate_final_email()
 			Content-Type: text/plain; charset=utf8; format=flowed
 			Content-Transfer-Encoding: 7bit
 			Content-Language: en-US
-			\0
 		FINAL_MAIL_HEREDOC
 	fi
 }

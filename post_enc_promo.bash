@@ -530,7 +530,7 @@ create_email()
 {
 	date_header="$(date --rfc-email)"
 
-IFS= read -r -d '\0' message <<MAIL_HEREDOC
+IFS= read -r -d $'\0' message <<MAIL_HEREDOC || true
 From: ${from}
 To: ${to}
 Subject: ${subject}
@@ -580,7 +580,6 @@ Content-Transfer-Encoding: 7bit
 </html>
 
 --${mime_boundary}--
-\0
 MAIL_HEREDOC
 
 	printf '%s\n' "$message"
@@ -590,7 +589,7 @@ create_both_email()
 {
 	date_header="$(date --rfc-email)"
 
-IFS= read -r -d '\0' message <<BOTH_MAIL_HEREDOC
+IFS= read -r -d $'\0' message <<BOTH_MAIL_HEREDOC || true
 From: ${from}
 To: ${to}
 Subject: ${subject}
@@ -650,7 +649,6 @@ Content-Transfer-Encoding: 7bit
 </html>
 
 --${mime_boundary}--
-\0
 BOTH_MAIL_HEREDOC
 
 	printf '%s\n' "$message"
